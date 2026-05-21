@@ -66,36 +66,24 @@ tbody tr:hover td{background:#fafaf7}
 <script>
 const SHEET_ID = '1f6QhW9hMR7EBq5KrgKhFxVEHvyvjxbcshcevSYJkVi8';
 
-// ── Busca aba via gviz/tq (funciona com planilha pública, sem CORS) ───────────
-function fetchSheet(sheetName) {
-  return new Promise((resolve, reject) => {
-    const cb = '_cb_' + Math.random().toString(36).slice(2);
-    const script = document.createElement('script');
-    const timer = setTimeout(() => {
-      cleanup(); reject(new Error('Timeout: ' + sheetName));
-    }, 15000);
-
-    function cleanup() {
-      clearTimeout(timer);
-      delete window[cb];
-      if (script.parentNode) script.parentNode.removeChild(script);
+// ── Busca aba via export CSV (funciona com planilha pública, HTTPS, sem CORS) ─
+async function fetchSheet(sheetName) {
+  const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
+    '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(sheetName);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + sheetName);
+  const text = await res.text();
+  // parse CSV respeitando aspas
+  return text.trim().split('\n').map(line => {
+    const cols = []; let cur = ''; let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
     }
-
-    window[cb] = function(resp) {
-      cleanup();
-      try {
-        const rows = (resp.table.rows || []).map(r =>
-          (r.c || []).map(c => (c && c.v != null) ? String(c.v) : '')
-        );
-        resolve(rows);
-      } catch(e) { reject(e); }
-    };
-
-    script.onerror = () => { cleanup(); reject(new Error('Erro ao carregar: ' + sheetName)); };
-    script.src = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
-      '/gviz/tq?tqx=out:json&callback=' + cb +
-      '&sheet=' + encodeURIComponent(sheetName);
-    document.head.appendChild(script);
+    cols.push(cur.trim());
+    return cols;
   });
 }
 
