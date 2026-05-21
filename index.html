@@ -2,334 +2,322 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Engenharia, Infra e Dados — Mar · Abr · Mai 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard — Eng, Infra e Dados</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#F5F4F0;--bg2:#FFFFFF;--bg3:#F0EEE9;--bg4:#E8E6E1;
-  --border:#DDD9D1;--border2:#C8C4BB;
-  --text:#1A1916;--muted:#6B6860;--faint:#B8B4AC;
-  --eng:#16A34A;--inf:#1D6FB5;--dat:#B45309;
-  --red:#C0392B;--amber:#B45309;
-  --r:6px;--r2:10px;
-  --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
-}
-html{background:var(--bg);color:var(--text);font-family:var(--display);min-height:100vh}
-body{max-width:960px;margin:0 auto;padding:40px 24px 80px}
-.header{margin-bottom:48px}
-.eyebrow{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.eyebrow::before{content:'';width:20px;height:1px;background:var(--border2)}
-h1{font-size:clamp(28px,5vw,44px);font-weight:800;line-height:1.1;letter-spacing:-.02em}
-h1 span{color:var(--muted)}
-.subtitle{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:14px}
-.note-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(180,83,9,.07);border:1px solid rgba(180,83,9,.2);border-radius:20px;padding:5px 12px;font-family:var(--mono);font-size:11px;color:var(--amber);margin-top:16px}
-.highlights{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:40px}
-.hl-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px;position:relative;overflow:hidden}
-.hl-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.hl-card.rd::after{background:var(--red)}
-.hl-card.gn::after{background:var(--eng)}
-.hl-card.am::after{background:var(--amber)}
-.hl-tag{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
-.hl-tag.rd{color:var(--red)}.hl-tag.gn{color:var(--eng)}.hl-tag.am{color:var(--amber)}
-.hl-name{font-size:12px;color:var(--muted);margin-bottom:6px;line-height:1.4}
-.hl-val{font-family:var(--mono);font-size:22px;font-weight:500;line-height:1}
-.hl-val.rd{color:var(--red)}.hl-val.gn{color:var(--eng)}.hl-val.am{color:var(--amber)}
-.hl-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px}
-.section{margin-bottom:40px}
-.section-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.section-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.section-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
-.section-line{flex:1;height:1px;background:var(--border)}
-.tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
-table{width:100%;border-collapse:collapse}
-thead tr{border-bottom:1px solid var(--border)}
-th{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:10px 14px;text-align:right;font-weight:500;white-space:nowrap}
-th:first-child{text-align:left;padding-left:18px}
-tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
-tbody tr:last-child{border-bottom:none}
-tbody tr:hover{background:var(--bg3)}
-td{font-family:var(--mono);font-size:12.5px;padding:10px 14px;text-align:right;white-space:nowrap;vertical-align:middle;color:var(--text)}
-td:first-child{text-align:left;padding-left:18px;color:var(--muted);font-size:12px;white-space:normal}
-td.na{color:var(--faint);font-size:11px}
-.badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 8px;border-radius:4px;letter-spacing:.02em}
-.badge.rd{background:rgba(192,57,43,.08);color:var(--red);border:1px solid rgba(192,57,43,.2)}
-.badge.gn{background:rgba(22,163,74,.08);color:var(--eng);border:1px solid rgba(22,163,74,.2)}
-.badge.am{background:rgba(180,83,9,.08);color:var(--amber);border:1px solid rgba(180,83,9,.2)}
-.badge.nt{background:var(--bg4);color:var(--muted);border:1px solid var(--border)}
-.badge.na{background:transparent;color:var(--faint);border:1px solid var(--border);font-size:9px}
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-@media(max-width:600px){.charts-grid{grid-template-columns:1fr}}
-.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px}
-.chart-title{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:6px}
-.chart-title::before{content:'';width:3px;height:10px;border-radius:2px}
-.chart-title.eng::before{background:var(--eng)}
-.chart-title.inf::before{background:var(--inf)}
-.chart-title.dat::before{background:var(--dat)}
-.nodata-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;margin-bottom:24px}
-.nodata-title{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
-.nodata-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
-.nodata-item{font-family:var(--mono);font-size:11px;color:var(--faint);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px}
-.nodata-item span{color:var(--muted);margin-right:4px}
-.nodata-item strong{color:var(--text);font-weight:400}
-.footer{margin-top:56px;border-top:1px solid var(--border);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.footer-label{font-family:var(--mono);font-size:10px;color:var(--faint)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:14px}
+.hdr{background:#fff;border-bottom:.5px solid #e0ddd5;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:8px;flex-wrap:wrap}
+.hdr h1{font-size:15px;font-weight:500}
+.hr{display:flex;align-items:center;gap:10px}
+.upd{font-size:11px;color:#999}
+.btn{font-size:12px;padding:5px 13px;border:.5px solid #d0cdc5;border-radius:8px;background:#fff;cursor:pointer;color:#444;transition:background .15s}
+.btn:hover{background:#f0efe8}
+.wrap{padding:18px 20px;max-width:1100px;margin:0 auto}
+.note{background:#fff;border:.5px solid #e0ddd5;border-radius:8px;padding:9px 13px;font-size:11.5px;color:#666;margin-bottom:18px;display:flex;gap:7px}
+.tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:5px 13px;border-radius:8px;border:.5px solid #d0cdc5;background:#fff;color:#666;cursor:pointer;transition:all .15s}
+.tab.active.all{background:#f0efe8;color:#1a1a1a;border-color:#bbb}
+.tab.active.eng{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}
+.tab.active.inf{background:#E6F1FB;color:#185FA5;border-color:#B5D4F4}
+.tab.active.dat{background:#FAEEDA;color:#854F0B;border-color:#FAC775}
+.sec{display:none}.sec.visible{display:block}
+.sl{font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin-bottom:4px}
+.card{background:#fff;border:.5px solid #e0ddd5;border-radius:10px;padding:12px 14px}
+.card .lbl{font-size:11px;color:#888;margin-bottom:5px}
+.card .val{font-size:21px;font-weight:500;line-height:1.1}
+.card .sub{font-size:11px;margin-top:5px}
+.bk{font-size:11px;font-weight:500;padding:2px 7px;border-radius:6px;display:inline-block;white-space:nowrap}
+.bk.gn{background:#EAF3DE;color:#3B6D11}
+.bk.rd{background:#FCEBEB;color:#A32D2D}
+.bk.am{background:#FAEEDA;color:#854F0B}
+.bk.nt{background:#f0efe8;color:#666}
+.bk.na{background:#f0efe8;color:#aaa;font-size:10px}
+.tw{overflow-x:auto;margin-bottom:4px}
+table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden;border:.5px solid #e0ddd5}
+thead th{font-size:10.5px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;padding:7px 10px;border-bottom:.5px solid #e0ddd5;text-align:right;white-space:nowrap;background:#fafaf7}
+thead th:first-child{text-align:left}
+tbody td{padding:7px 10px;border-bottom:.5px solid #f0efe8;text-align:right;vertical-align:middle;white-space:nowrap}
+tbody td:first-child{text-align:left;color:#555;white-space:normal;max-width:220px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#fafaf7}
+.cw{background:#fff;border:.5px solid #e0ddd5;border-radius:10px;padding:14px;margin-bottom:4px}
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:#666}
+.leg span{display:flex;align-items:center;gap:4px}
+.leg-sq{width:9px;height:9px;border-radius:2px;flex-shrink:0}
 </style>
 </head>
 <body>
-
-<div class="header">
-  <div class="eyebrow">KPI Report &middot; 2026</div>
-  <h1>Engenharia, Infra<br><span>&amp; Dados</span></h1>
-  <div class="subtitle">Totais mensais &middot; Mar&ccedil;o &rarr; Abril &rarr; Maio 2026</div>
-  <div class="note-pill">&#9888; Maio parcial &mdash; 3 semanas (26/abr&ndash;16/mai)</div>
-</div>
-
-<div class="highlights">
-  <div class="hl-card rd">
-    <div class="hl-tag rd">&#8595; Alerta</div>
-    <div class="hl-name">Bugs corrigidos ca&iacute;ram em abril</div>
-    <div class="hl-val rd">&minus;92%</div>
-    <div class="hl-sub">48 &rarr; 4 &rarr; 27</div>
-  </div>
-  <div class="hl-card gn">
-    <div class="hl-tag gn">&#8595; Positivo</div>
-    <div class="hl-name">Falhas n8n despencaram em abril</div>
-    <div class="hl-val gn">&minus;95%</div>
-    <div class="hl-sub">152.464 &rarr; 7.426 &rarr; 28.716</div>
-  </div>
-  <div class="hl-card am">
-    <div class="hl-tag am">&#8593; Aten&ccedil;&atilde;o</div>
-    <div class="hl-name">Falhas dashboards explodiram em maio</div>
-    <div class="hl-val am">+3.220%</div>
-    <div class="hl-sub">132 &rarr; &mdash; &rarr; 4.383</div>
-  </div>
-  <div class="hl-card am">
-    <div class="hl-tag am">&#8593; Aten&ccedil;&atilde;o</div>
-    <div class="hl-name">Incidentes subindo todo m&ecirc;s</div>
-    <div class="hl-val am">13&rarr;15&rarr;16</div>
-    <div class="hl-sub">+15% mar&rarr;abr, +7% abr&rarr;mai</div>
+<div class="hdr">
+  <h1>📊 Engenharia, Infra e Dados</h1>
+  <div class="hr">
+    <span class="upd" id="upd">—</span>
+    <button class="btn" onclick="init()">↻ Atualizar</button>
   </div>
 </div>
-
-<!-- ENGENHARIA -->
-<div class="section">
-  <div class="section-header">
-    <div class="section-dot" style="background:var(--eng)"></div>
-    <div class="section-label" style="color:var(--eng)">Engenharia</div>
-    <div class="section-line"></div>
-  </div>
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr>
-        <th>Indicador</th>
-        <th>Mar&ccedil;o</th><th>Abril</th><th>Maio <span style="opacity:.5">(parc.)</span></th>
-        <th>Mar&rarr;Abr</th><th>Abr&rarr;Mai</th>
-      </tr></thead>
-      <tbody>
-        <tr><td>Tarefas / Story entregues</td><td>23</td><td>23</td><td>37</td><td><span class="badge nt">= est&aacute;vel</span></td><td><span class="badge gn">+61%</span></td></tr>
-        <tr><td>Bugs corrigidos</td><td>48</td><td>4</td><td>27</td><td><span class="badge rd">&minus;92%</span></td><td><span class="badge gn">+575%</span></td></tr>
-        <tr><td>Bugs em backlog (fim m&ecirc;s)</td><td>157</td><td class="na">&mdash;</td><td>147</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
-        <tr><td>Demandas em andamento (WIP)</td><td>27</td><td>25</td><td>33</td><td><span class="badge nt">&minus;7%</span></td><td><span class="badge am">+32%</span></td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- INFRA -->
-<div class="section">
-  <div class="section-header">
-    <div class="section-dot" style="background:var(--inf)"></div>
-    <div class="section-label" style="color:var(--inf)">Infra</div>
-    <div class="section-line"></div>
-  </div>
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr>
-        <th>Indicador</th>
-        <th>Mar&ccedil;o</th><th>Abril</th><th>Maio <span style="opacity:.5">(parc.)</span></th>
-        <th>Mar&rarr;Abr</th><th>Abr&rarr;Mai</th>
-      </tr></thead>
-      <tbody>
-        <tr><td>Incidentes no m&ecirc;s</td><td>13</td><td>15</td><td>16</td><td><span class="badge am">+15%</span></td><td><span class="badge am">+7%</span></td></tr>
-        <tr><td>Falhas n8n (workflows)</td><td>152.464</td><td>7.426</td><td>28.716</td><td><span class="badge gn">&minus;95%</span></td><td><span class="badge rd">+287%</span></td></tr>
-        <tr><td>Mensagens trocadas</td><td>12,6M</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
-        <tr><td>Logins na plataforma</td><td>39.304</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
-        <tr><td>Consumo Oracle (R$)</td><td>R$ 27.745</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
-        <tr><td>Consumo IA Oracle (R$)</td><td>R$ 1.096</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
-        <tr><td>Consumo IA OpenAI ($)</td><td>$682</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- DADOS -->
-<div class="section">
-  <div class="section-header">
-    <div class="section-dot" style="background:var(--dat)"></div>
-    <div class="section-label" style="color:var(--dat)">Dados</div>
-    <div class="section-line"></div>
-  </div>
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr>
-        <th>Indicador</th>
-        <th>Mar&ccedil;o</th><th>Abril</th><th>Maio <span style="opacity:.5">(parc.)</span></th>
-        <th>Mar&rarr;Abr</th><th>Abr&rarr;Mai</th>
-      </tr></thead>
-      <tbody>
-        <tr><td>Demandas planejadas</td><td>16</td><td>16</td><td>10</td><td><span class="badge nt">= est&aacute;vel</span></td><td><span class="badge am">&minus;38%</span></td></tr>
-        <tr><td>Demandas entregues</td><td>16</td><td>16</td><td>9</td><td><span class="badge nt">= est&aacute;vel</span></td><td><span class="badge rd">&minus;44%</span></td></tr>
-        <tr><td>Demandas atrasadas</td><td>0</td><td>0</td><td>1</td><td><span class="badge gn">= zero</span></td><td><span class="badge am">+1</span></td></tr>
-        <tr><td>Falhas na pipeline</td><td>52</td><td class="na">&mdash;</td><td>46</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
-        <tr><td>Falhas em dashboards</td><td>132</td><td class="na">&mdash;</td><td>4.383</td><td><span class="badge na">sem dado</span></td><td><span class="badge rd">+3.220%</span></td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- CHARTS -->
-<div class="section">
-  <div class="section-header">
-    <div class="section-dot" style="background:var(--muted)"></div>
-    <div class="section-label" style="color:var(--muted)">Visualiza&ccedil;&otilde;es</div>
-    <div class="section-line"></div>
-  </div>
-
-  <div class="charts-grid">
-    <div class="chart-card">
-      <div class="chart-title eng">Engenharia &mdash; entregas e bugs</div>
-      <div id="chart_eng" style="width:100%;height:200px"></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title inf">Infra &mdash; incidentes mensais</div>
-      <div id="chart_inc" style="width:100%;height:200px"></div>
-    </div>
-  </div>
-
-  <div class="chart-card" style="margin-bottom:16px">
-    <div class="chart-title inf">Infra &mdash; falhas n8n por m&ecirc;s</div>
-    <div id="chart_n8n" style="width:100%;height:180px"></div>
-  </div>
-
-  <div class="chart-card">
-    <div class="chart-title dat">Dados &mdash; demandas entregues vs. falhas em dashboards</div>
-    <div id="chart_dados" style="width:100%;height:180px"></div>
-  </div>
-</div>
-
-<!-- NO DATA -->
-<div class="nodata-section">
-  <div class="nodata-title">Indicadores sem dado em abril/maio (mudan&ccedil;a de estrutura)</div>
-  <div class="nodata-grid">
-    <div class="nodata-item"><span>Infra</span> <strong>Consumo Oracle &middot; base R$27.7k/m&ecirc;s</strong></div>
-    <div class="nodata-item"><span>Infra</span> <strong>Consumo IA Oracle &middot; base R$1.1k/m&ecirc;s</strong></div>
-    <div class="nodata-item"><span>Infra</span> <strong>Consumo IA OpenAI &middot; base $683/m&ecirc;s</strong></div>
-    <div class="nodata-item"><span>Infra</span> <strong>Mensagens trocadas &middot; base 12,6M/m&ecirc;s</strong></div>
-    <div class="nodata-item"><span>Infra</span> <strong>Logins plataforma &middot; base 39k/m&ecirc;s</strong></div>
-    <div class="nodata-item"><span>Eng</span> <strong>Bugs em backlog &middot; base 157 (fim mar)</strong></div>
-  </div>
-</div>
-
-<div class="footer">
-  <div class="footer-label">Engenharia, Infra e Dados &middot; Jetsales</div>
-  <div class="footer-label">Fonte: Google Drive &middot; Gerado em 20/05/2026</div>
-</div>
+<div id="root"></div>
 
 <script>
-var BG   = '#FFFFFF';
-var GRID = '#DDD9D1';
-var TEXT = '#6B6860';
-var FONT = 'DM Mono';
+// ── DADOS REAIS extraídos da planilha (acumulados mensais) ─────────────────
+const SRC = {
+  mar: {
+    // Engenharia (JetGo = único squad em mar)
+    eng_tarefas: 23, eng_bugs: 9, eng_backlog: 157, eng_wip: 27,
+    // Infra
+    inf_inc: 13, inf_n8n: 152464, inf_n8n_infra: null,
+    inf_msg: 12591895, inf_logins: 39304,
+    inf_oracle: 27745.26, inf_oracle_ia: 1096.18, inf_openai: 682.53,
+    inf_n3: null,
+    // Dados
+    dat_plan: 16, dat_entr: 16, dat_atrs: 0, dat_pipe: 52, dat_dash: 132,
+  },
+  abr: {
+    // Engenharia JetGo
+    eng_tarefas: 23, eng_bugs: 4, eng_backlog: 154, eng_wip: 25,
+    // n8n total abril = 7426 (Prod Internos)
+    inf_inc: 15, inf_n8n: 7426, inf_n8n_infra: 948,
+    inf_msg: null, inf_logins: null,
+    inf_oracle: null, inf_oracle_ia: null, inf_openai: null,
+    inf_n3: null,
+    dat_plan: 16, dat_entr: 16, dat_atrs: 0, dat_pipe: null, dat_dash: null,
+  },
+  mai: {
+    // Engenharia JetGo
+    eng_tarefas: 37, eng_bugs: 27, eng_backlog: 147, eng_wip: 33,
+    inf_inc: 16, inf_n8n: 28716, inf_n8n_infra: 665,
+    inf_msg: null, inf_logins: null,
+    inf_oracle: null, inf_oracle_ia: null, inf_openai: null,
+    inf_n3: 20,
+    dat_plan: 10, dat_entr: 9, dat_atrs: 1, dat_pipe: 46, dat_dash: 4383,
+  }
+};
 
-function baseOpts(title) {
-  return {
-    backgroundColor: 'transparent',
-    chartArea: {backgroundColor: 'transparent', left: 52, right: 16, top: 8, bottom: 36},
-    legend: {position: 'bottom', textStyle: {color: TEXT, fontSize: 10, fontName: FONT}},
-    hAxis: {textStyle: {color: TEXT, fontSize: 10, fontName: FONT}, gridlines: {color: 'transparent'}, baselineColor: GRID},
-    vAxis: {textStyle: {color: TEXT, fontSize: 10, fontName: FONT}, gridlines: {color: GRID}, baselineColor: GRID},
-    tooltip: {textStyle: {fontName: FONT, fontSize: 12}, showColorCode: true},
-    fontName: FONT,
-    animation: {startup: true, duration: 600, easing: 'out'}
-  };
+// squads abril e maio
+const SQUADS = {
+  abr: [
+    {squad:'JetGo',        tarefas:28, bugs:40, n8n:null},
+    {squad:'Prod. Internos',tarefas:23, bugs:null, n8n:7426},
+    {squad:'Satélites',    tarefas:0,  bugs:0,  n8n:null},
+  ],
+  mai: [
+    {squad:'JetGo',         tarefas:37, bugs:27, n8n:null},
+    {squad:'Prod. Internos',tarefas:20, bugs:null, n8n:28716},
+    {squad:'Satélites',     tarefas:3,  bugs:0,  n8n:null},
+  ]
+};
+
+const M = ['Março','Abril','Maio (parc.)'];
+let charts = {};
+
+function n(v){return v??null}
+function f(v,pre=''){
+  if(v===null||v===undefined)return'—';
+  const x=typeof v==='number'?v:parseFloat(String(v).replace(/[R$\s$]/g,'').replace(/\./g,'').replace(',','.'));
+  if(isNaN(x))return String(v);
+  if(Math.abs(x)>=1e6)return pre+(x/1e6).toFixed(1)+'M';
+  if(Math.abs(x)>=1000)return pre+x.toLocaleString('pt-BR');
+  return pre+x.toLocaleString('pt-BR');
+}
+function pct(a,b){
+  if(a===null||b===null||a===0)return null;
+  return Math.round(((b-a)/Math.abs(a))*100);
+}
+function bk(v,dir='good'){
+  if(v===null)return'<span class="bk na">sem dado</span>';
+  if(v===0)return'<span class="bk nt">=</span>';
+  const pos=v>0;
+  const cls=dir==='good'?(pos?'gn':'rd'):(pos?'rd':'gn');
+  return`<span class="bk ${cls}">${pos?'+':''}${v}%</span>`;
+}
+function dch(){Object.values(charts).forEach(c=>c.destroy());charts={};}
+function mkBar(id,labels,datasets){
+  const c=document.getElementById(id);if(!c)return;
+  charts[id]=new Chart(c,{type:'bar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11},color:'#999'},grid:{display:false}},y:{ticks:{font:{size:11},color:'#999',callback:v=>Math.abs(v)>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,.06)'},beginAtZero:true}}}});
+}
+function mkLine(id,labels,datasets){
+  const c=document.getElementById(id);if(!c)return;
+  charts[id]=new Chart(c,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11},color:'#999'},grid:{display:false}},y:{ticks:{font:{size:11},color:'#999',callback:v=>Math.abs(v)>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,.06)'}}}}});
 }
 
-function drawAll() {
-  drawEng();
-  drawInc();
-  drawN8n();
-  drawDados();
+function setTab(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('visible'));
+  document.querySelector('.tab.'+t).classList.add('active');
+  document.getElementById('sec-'+t).classList.add('visible');
 }
 
-function drawEng() {
-  var data = google.visualization.arrayToDataTable([
-    ['M\u00eas', 'Tarefas entregues', 'Bugs corrigidos'],
-    ['Mar\u00e7o', 23, 48],
-    ['Abril',  23,  4],
-    ['Maio',   37, 27]
+function render(){
+  const {mar,abr,mai}=SRC;
+  dch();
+
+  // helpers
+  const ev=[mar.eng_tarefas,abr.eng_tarefas,mai.eng_tarefas];
+  const eb=[mar.eng_bugs,abr.eng_bugs,mai.eng_bugs];
+  const ew=[mar.eng_wip,abr.eng_wip,mai.eng_wip];
+  const ebk=[mar.eng_backlog,abr.eng_backlog,mai.eng_backlog];
+  const ii=[mar.inf_inc,abr.inf_inc,mai.inf_inc];
+  const in8=[mar.inf_n8n,abr.inf_n8n,mai.inf_n8n];
+  const in8i=[mar.inf_n8n_infra,abr.inf_n8n_infra,mai.inf_n8n_infra];
+  const dp=[mar.dat_plan,abr.dat_plan,mai.dat_plan];
+  const de=[mar.dat_entr,abr.dat_entr,mai.dat_entr];
+  const da=[mar.dat_atrs,abr.dat_atrs,mai.dat_atrs];
+  const dpi=[mar.dat_pipe,abr.dat_pipe,mai.dat_pipe];
+  const dd=[mar.dat_dash,abr.dat_dash,mai.dat_dash];
+
+  const taxaMai=dp[2]>0?Math.round(de[2]/dp[2]*100):null;
+
+  document.getElementById('root').innerHTML=`
+  <div class="wrap">
+    <div class="note">ℹ️ Maio parcial = 3 semanas (26/abr–16/mai). "—" = não reportado.</div>
+    <div class="tabs">
+      <button class="tab active all" onclick="setTab('all')">Visão geral</button>
+      <button class="tab eng" onclick="setTab('eng')">Engenharia</button>
+      <button class="tab inf" onclick="setTab('inf')">Infra</button>
+      <button class="tab dat" onclick="setTab('dat')">Dados</button>
+    </div>
+
+    <!-- GERAL -->
+    <div class="sec visible" id="sec-all">
+      <div class="sl">Destaques — maio (parcial)</div>
+      <div class="cards">
+        <div class="card"><div class="lbl">Tarefas entregues</div><div class="val">${f(ev[2])}</div><div class="sub">${bk(pct(ev[1],ev[2]),'good')} vs abr</div></div>
+        <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${f(eb[2])}</div><div class="sub">${bk(pct(eb[1],eb[2]),'good')} vs abr</div></div>
+        <div class="card"><div class="lbl">Incidentes Infra</div><div class="val">${f(ii[2])}</div><div class="sub">${bk(pct(ii[1],ii[2]),'bad')} vs abr</div></div>
+        <div class="card"><div class="lbl">Falhas n8n</div><div class="val" style="font-size:17px">${f(in8[2])}</div><div class="sub">${bk(pct(in8[1],in8[2]),'bad')} vs abr</div></div>
+        <div class="card"><div class="lbl">Demandas Dados</div><div class="val">${f(de[2])}/${f(dp[2])}</div><div class="sub">${taxaMai!==null?`<span class="bk am">${taxaMai}%</span> taxa`:''}</div></div>
+        <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:17px">${f(dd[2])}</div><div class="sub">${bk(pct(dd[0],dd[2]),'bad')} vs mar</div></div>
+      </div>
+      <div class="sl">Tarefas, bugs e incidentes por mês</div>
+      <div class="leg">
+        <span><span class="leg-sq" style="background:#B5D4F4"></span>Março</span>
+        <span><span class="leg-sq" style="background:#9FE1CB"></span>Abril</span>
+        <span><span class="leg-sq" style="background:#FAC775"></span>Maio</span>
+      </div>
+      <div class="cw" style="height:250px"><canvas id="c-all-bar"></canvas></div>
+      <div class="sl">Falhas n8n — evolução</div>
+      <div class="cw" style="height:190px"><canvas id="c-all-n8n"></canvas></div>
+    </div>
+
+    <!-- ENG -->
+    <div class="sec" id="sec-eng">
+      <div class="sl" style="color:#3B6D11">Totais mensais</div>
+      <div class="cards">
+        <div class="card"><div class="lbl">Tarefas (mai)</div><div class="val">${f(ev[2])}</div><div class="sub">${bk(pct(ev[1],ev[2]),'good')} vs abr</div></div>
+        <div class="card"><div class="lbl">Bugs corrigidos (mai)</div><div class="val">${f(eb[2])}</div><div class="sub">${bk(pct(eb[1],eb[2]),'good')} vs abr</div></div>
+        <div class="card"><div class="lbl">Backlog bugs (mai)</div><div class="val">${f(ebk[2])}</div><div class="sub" style="color:#999;font-size:11px">mar: ${f(ebk[0])}</div></div>
+        <div class="card"><div class="lbl">WIP (mai)</div><div class="val">${f(ew[2])}</div><div class="sub">${bk(pct(ew[1],ew[2]),'bad')} vs abr</div></div>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th style="text-align:left">Indicador</th><th>Março</th><th>Abril</th><th>Maio</th><th>Mar→Abr</th><th>Abr→Mai</th></tr></thead>
+        <tbody>
+          <tr><td>Tarefas/Story entregues</td><td>${f(ev[0])}</td><td>${f(ev[1])}</td><td>${f(ev[2])}</td><td>${bk(pct(ev[0],ev[1]),'good')}</td><td>${bk(pct(ev[1],ev[2]),'good')}</td></tr>
+          <tr><td>Bugs corrigidos</td><td>${f(eb[0])}</td><td>${f(eb[1])}</td><td>${f(eb[2])}</td><td>${bk(pct(eb[0],eb[1]),'good')}</td><td>${bk(pct(eb[1],eb[2]),'good')}</td></tr>
+          <tr><td>Bugs em backlog</td><td>${f(ebk[0])}</td><td>${f(ebk[1])}</td><td>${f(ebk[2])}</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
+          <tr><td>Demandas em andamento (WIP)</td><td>${f(ew[0])}</td><td>${f(ew[1])}</td><td>${f(ew[2])}</td><td>${bk(pct(ew[0],ew[1]),'bad')}</td><td>${bk(pct(ew[1],ew[2]),'bad')}</td></tr>
+        </tbody>
+      </table></div>
+      <div class="sl">Squads — abril e maio</div>
+      <div class="tw"><table>
+        <thead><tr><th style="text-align:left">Squad</th><th>Tarefas Abr</th><th>Tarefas Mai</th><th>Bugs Abr</th><th>Bugs Mai</th></tr></thead>
+        <tbody>
+          ${SQUADS.abr.map((s,i)=>`<tr><td>${s.squad}</td><td>${f(s.tarefas)}</td><td>${f(SQUADS.mai[i].tarefas)}</td><td>${f(s.bugs)}</td><td>${f(SQUADS.mai[i].bugs)}</td></tr>`).join('')}
+        </tbody>
+      </table></div>
+      <div class="sl">Evolução — tarefas, bugs e WIP</div>
+      <div class="leg">
+        <span><span class="leg-sq" style="background:#639922"></span>Tarefas</span>
+        <span><span class="leg-sq" style="background:#E24B4A;border-radius:50%"></span>Bugs corrigidos</span>
+        <span><span class="leg-sq" style="background:#888;border-radius:50%"></span>WIP</span>
+      </div>
+      <div class="cw" style="height:230px"><canvas id="c-eng-line"></canvas></div>
+    </div>
+
+    <!-- INF -->
+    <div class="sec" id="sec-inf">
+      <div class="sl" style="color:#185FA5">Totais mensais</div>
+      <div class="cards">
+        <div class="card"><div class="lbl">Incidentes (mai)</div><div class="val">${f(ii[2])}</div><div class="sub">${bk(pct(ii[1],ii[2]),'bad')} vs abr</div></div>
+        <div class="card"><div class="lbl">Falhas n8n total (mai)</div><div class="val" style="font-size:17px">${f(in8[2])}</div><div class="sub">${bk(pct(in8[1],in8[2]),'bad')} vs abr</div></div>
+        <div class="card"><div class="lbl">Falhas n8n Infra (mai)</div><div class="val" style="font-size:17px">${f(in8i[2])}</div><div class="sub">${bk(pct(in8i[1],in8i[2]),'bad')} vs abr</div></div>
+        <div class="card"><div class="lbl">Demandas N3 (mai)</div><div class="val">${f(mai.inf_n3)}</div><div class="sub" style="color:#999;font-size:11px">novo indicador</div></div>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th style="text-align:left">Indicador</th><th>Março</th><th>Abril</th><th>Maio</th><th>Mar→Abr</th><th>Abr→Mai</th></tr></thead>
+        <tbody>
+          <tr><td>Incidentes no mês</td><td>${f(ii[0])}</td><td>${f(ii[1])}</td><td>${f(ii[2])}</td><td>${bk(pct(ii[0],ii[1]),'bad')}</td><td>${bk(pct(ii[1],ii[2]),'bad')}</td></tr>
+          <tr><td>Falhas n8n (total)</td><td>${f(in8[0])}</td><td>${f(in8[1])}</td><td>${f(in8[2])}</td><td>${bk(pct(in8[0],in8[1]),'bad')}</td><td>${bk(pct(in8[1],in8[2]),'bad')}</td></tr>
+          <tr><td>Falhas n8n (só Infra)</td><td>—</td><td>${f(in8i[1])}</td><td>${f(in8i[2])}</td><td><span class="bk na">sem dado</span></td><td>${bk(pct(in8i[1],in8i[2]),'bad')}</td></tr>
+          <tr><td>Demandas N3</td><td>—</td><td>—</td><td>${f(mai.inf_n3)}</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
+          <tr><td>Mensagens trocadas</td><td>${f(mar.inf_msg)}</td><td>—</td><td>—</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
+          <tr><td>Logins na plataforma</td><td>${f(mar.inf_logins)}</td><td>—</td><td>—</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
+          <tr><td>Consumo Oracle (R$)</td><td>R$ ${f(mar.inf_oracle)}</td><td>—</td><td>—</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
+          <tr><td>Consumo IA Oracle (R$)</td><td>R$ ${f(mar.inf_oracle_ia)}</td><td>—</td><td>—</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
+          <tr><td>Consumo IA OpenAI ($)</td><td>$${f(mar.inf_openai)}</td><td>—</td><td>—</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
+        </tbody>
+      </table></div>
+      <div class="sl">Falhas n8n — evolução</div>
+      <div class="cw" style="height:190px"><canvas id="c-inf-n8n"></canvas></div>
+      <div class="sl">Incidentes por mês</div>
+      <div class="cw" style="height:170px"><canvas id="c-inf-inc"></canvas></div>
+    </div>
+
+    <!-- DAT -->
+    <div class="sec" id="sec-dat">
+      <div class="sl" style="color:#854F0B">Totais mensais</div>
+      <div class="cards">
+        <div class="card"><div class="lbl">Entregues/Planejadas (mai)</div><div class="val">${f(de[2])}/${f(dp[2])}</div><div class="sub">${taxaMai!==null?`<span class="bk am">${taxaMai}%</span> taxa`:''}</div></div>
+        <div class="card"><div class="lbl">Atrasadas (mai)</div><div class="val">${f(da[2])}</div><div class="sub">${bk(pct(da[1],da[2]),'bad')} vs abr</div></div>
+        <div class="card"><div class="lbl">Falhas pipeline (mai)</div><div class="val">${f(dpi[2])}</div><div class="sub" style="color:#999;font-size:11px">mar: ${f(dpi[0])}</div></div>
+        <div class="card"><div class="lbl">Falhas dashboards (mai)</div><div class="val" style="font-size:17px">${f(dd[2])}</div><div class="sub">${bk(pct(dd[0],dd[2]),'bad')} vs mar</div></div>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th style="text-align:left">Indicador</th><th>Março</th><th>Abril</th><th>Maio</th><th>Mar→Abr</th><th>Abr→Mai</th></tr></thead>
+        <tbody>
+          <tr><td>Demandas planejadas</td><td>${f(dp[0])}</td><td>${f(dp[1])}</td><td>${f(dp[2])}</td><td>${bk(pct(dp[0],dp[1]),'good')}</td><td>${bk(pct(dp[1],dp[2]),'good')}</td></tr>
+          <tr><td>Demandas entregues</td><td>${f(de[0])}</td><td>${f(de[1])}</td><td>${f(de[2])}</td><td>${bk(pct(de[0],de[1]),'good')}</td><td>${bk(pct(de[1],de[2]),'good')}</td></tr>
+          <tr><td>Demandas atrasadas</td><td>${f(da[0])}</td><td>${f(da[1])}</td><td>${f(da[2])}</td><td><span class="bk gn">=</span></td><td>${bk(pct(da[1],da[2]),'bad')}</td></tr>
+          <tr><td>Falhas na pipeline</td><td>${f(dpi[0])}</td><td>—</td><td>${f(dpi[2])}</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
+          <tr><td>Falhas em dashboards</td><td>${f(dd[0])}</td><td>—</td><td>${f(dd[2])}</td><td><span class="bk na">sem dado</span></td><td>${bk(pct(dd[0],dd[2]),'bad')}</td></tr>
+        </tbody>
+      </table></div>
+      <div class="sl">Planejadas vs entregues</div>
+      <div class="leg"><span><span class="leg-sq" style="background:#FAC775"></span>Planejadas</span><span><span class="leg-sq" style="background:#9FE1CB"></span>Entregues</span></div>
+      <div class="cw" style="height:195px"><canvas id="c-dat-bar"></canvas></div>
+      <div class="sl">Falhas em dashboards</div>
+      <div class="cw" style="height:180px"><canvas id="c-dat-dash"></canvas></div>
+    </div>
+  </div>`;
+
+  // gráficos
+  mkBar('c-all-bar',['Tarefas','Bugs corrigidos','Incidentes'],[
+    {label:'Março',data:[ev[0],eb[0],ii[0]],backgroundColor:'#B5D4F4',borderColor:'#378ADD',borderWidth:1,borderRadius:4},
+    {label:'Abril',data:[ev[1],eb[1],ii[1]],backgroundColor:'#9FE1CB',borderColor:'#1D9E75',borderWidth:1,borderRadius:4},
+    {label:'Maio',data:[ev[2],eb[2],ii[2]],backgroundColor:'#FAC775',borderColor:'#EF9F27',borderWidth:1,borderRadius:4},
   ]);
-  var opts = baseOpts('');
-  opts.colors = ['#16A34A', '#C0392B'];
-  opts.bar = {groupWidth: '55%'};
-  opts.legend = {position: 'bottom', textStyle: {color: TEXT, fontSize: 10, fontName: FONT}};
-  new google.visualization.ColumnChart(document.getElementById('chart_eng')).draw(data, opts);
-}
-
-function drawInc() {
-  var data = google.visualization.arrayToDataTable([
-    ['M\u00eas', 'Incidentes', {role: 'style'}],
-    ['Mar\u00e7o', 13, 'color: #1D6FB5'],
-    ['Abril',  15, 'color: #B45309'],
-    ['Maio',   16, 'color: #C0392B']
+  const lnOpts=(color,bg)=>({borderColor:color,backgroundColor:bg,borderWidth:2,pointRadius:5,pointBackgroundColor:color,fill:true,tension:0.3});
+  mkLine('c-all-n8n',M,[{label:'n8n',data:in8,...lnOpts('#E24B4A','rgba(226,75,74,.07)')}]);
+  mkLine('c-eng-line',M,[
+    {label:'Tarefas',data:ev,...lnOpts('#639922','rgba(99,153,34,.07)')},
+    {label:'Bugs',data:eb,borderColor:'#E24B4A',borderWidth:2,pointRadius:5,pointBackgroundColor:'#E24B4A',pointStyle:'triangle',fill:false,tension:0.3},
+    {label:'WIP',data:ew,borderColor:'#888',borderDash:[5,4],borderWidth:1.5,pointRadius:4,pointBackgroundColor:'#888',fill:false,tension:0.3},
   ]);
-  var opts = baseOpts('');
-  opts.legend = {position: 'none'};
-  opts.bar = {groupWidth: '50%'};
-  new google.visualization.ColumnChart(document.getElementById('chart_inc')).draw(data, opts);
-}
-
-function drawN8n() {
-  var data = google.visualization.arrayToDataTable([
-    ['M\u00eas', 'Falhas n8n'],
-    ['Mar\u00e7o', 152464],
-    ['Abril',    7426],
-    ['Maio',     28716]
+  mkLine('c-inf-n8n',M,[{label:'n8n',data:in8,...lnOpts('#E24B4A','rgba(226,75,74,.07)')}]);
+  mkBar('c-inf-inc',M,[{label:'Inc',data:ii,backgroundColor:['#B5D4F4','#9FE1CB','#FAC775'],borderColor:['#378ADD','#1D9E75','#EF9F27'],borderWidth:1,borderRadius:4}]);
+  mkBar('c-dat-bar',M,[
+    {label:'Plan',data:dp,backgroundColor:'#FAC775',borderColor:'#EF9F27',borderWidth:1,borderRadius:4},
+    {label:'Entr',data:de,backgroundColor:'#9FE1CB',borderColor:'#1D9E75',borderWidth:1,borderRadius:4},
   ]);
-  var opts = baseOpts('');
-  opts.colors = ['#C0392B'];
-  opts.legend = {position: 'none'};
-  opts.lineWidth = 2;
-  opts.pointSize = 6;
-  opts.areaOpacity = 0.08;
-  opts.vAxis = {
-    textStyle: {color: TEXT, fontSize: 10, fontName: FONT},
-    gridlines: {color: GRID},
-    baselineColor: GRID,
-    format: 'short'
-  };
-  new google.visualization.AreaChart(document.getElementById('chart_n8n')).draw(data, opts);
+  mkLine('c-dat-dash',['Março','(Abr s/ dado)','Maio'],[{label:'Dash',data:[dd[0],null,dd[2]],...lnOpts('#EF9F27','rgba(239,159,39,.08)'),spanGaps:true}]);
 }
 
-function drawDados() {
-  var data = google.visualization.arrayToDataTable([
-    ['M\u00eas', 'Demandas entregues', 'Falhas dashboards (\u00f710)'],
-    ['Mar\u00e7o', 16, 13.2],
-    ['Abril',  16, null],
-    ['Maio',    9, 438.3]
-  ]);
-  var opts = baseOpts('');
-  opts.colors = ['#B45309', '#C0392B'];
-  opts.bar = {groupWidth: '55%'};
-  opts.legend = {position: 'bottom', textStyle: {color: TEXT, fontSize: 10, fontName: FONT}};
-  opts.tooltip = {textStyle: {fontName: FONT, fontSize: 12}, showColorCode: true};
-  new google.visualization.ColumnChart(document.getElementById('chart_dados')).draw(data, opts);
+function init(){
+  document.getElementById('upd').textContent='Atualizado '+new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  render();
 }
 
-google.charts.load('current', {packages: ['corechart', 'bar']});
-google.charts.setCallback(drawAll);
+init();
 </script>
 </body>
 </html>
