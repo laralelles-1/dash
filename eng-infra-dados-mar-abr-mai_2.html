@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engenharia, Infra e Dados — Mar · Abr · Mai 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F4F0;--bg2:#FFFFFF;--bg3:#F0EEE9;--bg4:#E8E6E1;
+  --border:#DDD9D1;--border2:#C8C4BB;
+  --text:#1A1916;--muted:#6B6860;--faint:#B8B4AC;
+  --eng:#16A34A;--inf:#1D6FB5;--dat:#B45309;
+  --red:#C0392B;--amber:#B45309;
+  --r:6px;--r2:10px;
+  --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
+}
+html{background:var(--bg);color:var(--text);font-family:var(--display);min-height:100vh}
+body{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+.header{margin-bottom:48px}
+.eyebrow{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--border2)}
+h1{font-size:clamp(28px,5vw,44px);font-weight:800;line-height:1.1;letter-spacing:-.02em}
+h1 span{color:var(--muted)}
+.subtitle{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:14px}
+.note-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(180,83,9,.07);border:1px solid rgba(180,83,9,.2);border-radius:20px;padding:5px 12px;font-family:var(--mono);font-size:11px;color:var(--amber);margin-top:16px}
+.highlights{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:40px}
+.hl-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:16px;position:relative;overflow:hidden}
+.hl-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.hl-card.rd::after{background:var(--red)}
+.hl-card.gn::after{background:var(--eng)}
+.hl-card.am::after{background:var(--amber)}
+.hl-tag{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.hl-tag.rd{color:var(--red)}.hl-tag.gn{color:var(--eng)}.hl-tag.am{color:var(--amber)}
+.hl-name{font-size:12px;color:var(--muted);margin-bottom:6px;line-height:1.4}
+.hl-val{font-family:var(--mono);font-size:22px;font-weight:500;line-height:1}
+.hl-val.rd{color:var(--red)}.hl-val.gn{color:var(--eng)}.hl-val.am{color:var(--amber)}
+.hl-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px}
+.section{margin-bottom:40px}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.section-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.section-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.section-line{flex:1;height:1px;background:var(--border)}
+.tbl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+th{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:10px 14px;text-align:right;font-weight:500;white-space:nowrap}
+th:first-child{text-align:left;padding-left:18px}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg3)}
+td{font-family:var(--mono);font-size:12.5px;padding:10px 14px;text-align:right;white-space:nowrap;vertical-align:middle;color:var(--text)}
+td:first-child{text-align:left;padding-left:18px;color:var(--muted);font-size:12px;white-space:normal}
+td.na{color:var(--faint);font-size:11px}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 8px;border-radius:4px;letter-spacing:.02em}
+.badge.rd{background:rgba(192,57,43,.08);color:var(--red);border:1px solid rgba(192,57,43,.2)}
+.badge.gn{background:rgba(22,163,74,.08);color:var(--eng);border:1px solid rgba(22,163,74,.2)}
+.badge.am{background:rgba(180,83,9,.08);color:var(--amber);border:1px solid rgba(180,83,9,.2)}
+.badge.nt{background:var(--bg4);color:var(--muted);border:1px solid var(--border)}
+.badge.na{background:transparent;color:var(--faint);border:1px solid var(--border);font-size:9px}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:600px){.charts-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px}
+.chart-title{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.chart-title::before{content:'';width:3px;height:10px;border-radius:2px}
+.chart-title.eng::before{background:var(--eng)}
+.chart-title.inf::before{background:var(--inf)}
+.chart-title.dat::before{background:var(--dat)}
+.nodata-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;margin-bottom:24px}
+.nodata-title{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.nodata-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.nodata-item{font-family:var(--mono);font-size:11px;color:var(--faint);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px}
+.nodata-item span{color:var(--muted);margin-right:4px}
+.nodata-item strong{color:var(--text);font-weight:400}
+.footer{margin-top:56px;border-top:1px solid var(--border);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-label{font-family:var(--mono);font-size:10px;color:var(--faint)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">KPI Report &middot; 2026</div>
+  <h1>Engenharia, Infra<br><span>&amp; Dados</span></h1>
+  <div class="subtitle">Totais mensais &middot; Mar&ccedil;o &rarr; Abril &rarr; Maio 2026</div>
+  <div class="note-pill">&#9888; Maio parcial &mdash; 3 semanas (26/abr&ndash;16/mai)</div>
+</div>
+
+<div class="highlights">
+  <div class="hl-card rd">
+    <div class="hl-tag rd">&#8595; Alerta</div>
+    <div class="hl-name">Bugs corrigidos ca&iacute;ram em abril</div>
+    <div class="hl-val rd">&minus;92%</div>
+    <div class="hl-sub">48 &rarr; 4 &rarr; 27</div>
+  </div>
+  <div class="hl-card gn">
+    <div class="hl-tag gn">&#8595; Positivo</div>
+    <div class="hl-name">Falhas n8n despencaram em abril</div>
+    <div class="hl-val gn">&minus;95%</div>
+    <div class="hl-sub">152.464 &rarr; 7.426 &rarr; 28.716</div>
+  </div>
+  <div class="hl-card am">
+    <div class="hl-tag am">&#8593; Aten&ccedil;&atilde;o</div>
+    <div class="hl-name">Falhas dashboards explodiram em maio</div>
+    <div class="hl-val am">+3.220%</div>
+    <div class="hl-sub">132 &rarr; &mdash; &rarr; 4.383</div>
+  </div>
+  <div class="hl-card am">
+    <div class="hl-tag am">&#8593; Aten&ccedil;&atilde;o</div>
+    <div class="hl-name">Incidentes subindo todo m&ecirc;s</div>
+    <div class="hl-val am">13&rarr;15&rarr;16</div>
+    <div class="hl-sub">+15% mar&rarr;abr, +7% abr&rarr;mai</div>
+  </div>
+</div>
+
+<!-- ENGENHARIA -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-dot" style="background:var(--eng)"></div>
+    <div class="section-label" style="color:var(--eng)">Engenharia</div>
+    <div class="section-line"></div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Indicador</th>
+        <th>Mar&ccedil;o</th><th>Abril</th><th>Maio <span style="opacity:.5">(parc.)</span></th>
+        <th>Mar&rarr;Abr</th><th>Abr&rarr;Mai</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Tarefas / Story entregues</td><td>23</td><td>23</td><td>37</td><td><span class="badge nt">= est&aacute;vel</span></td><td><span class="badge gn">+61%</span></td></tr>
+        <tr><td>Bugs corrigidos</td><td>48</td><td>4</td><td>27</td><td><span class="badge rd">&minus;92%</span></td><td><span class="badge gn">+575%</span></td></tr>
+        <tr><td>Bugs em backlog (fim m&ecirc;s)</td><td>157</td><td class="na">&mdash;</td><td>147</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
+        <tr><td>Demandas em andamento (WIP)</td><td>27</td><td>25</td><td>33</td><td><span class="badge nt">&minus;7%</span></td><td><span class="badge am">+32%</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- INFRA -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-dot" style="background:var(--inf)"></div>
+    <div class="section-label" style="color:var(--inf)">Infra</div>
+    <div class="section-line"></div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Indicador</th>
+        <th>Mar&ccedil;o</th><th>Abril</th><th>Maio <span style="opacity:.5">(parc.)</span></th>
+        <th>Mar&rarr;Abr</th><th>Abr&rarr;Mai</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Incidentes no m&ecirc;s</td><td>13</td><td>15</td><td>16</td><td><span class="badge am">+15%</span></td><td><span class="badge am">+7%</span></td></tr>
+        <tr><td>Falhas n8n (workflows)</td><td>152.464</td><td>7.426</td><td>28.716</td><td><span class="badge gn">&minus;95%</span></td><td><span class="badge rd">+287%</span></td></tr>
+        <tr><td>Mensagens trocadas</td><td>12,6M</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
+        <tr><td>Logins na plataforma</td><td>39.304</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
+        <tr><td>Consumo Oracle (R$)</td><td>R$ 27.745</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
+        <tr><td>Consumo IA Oracle (R$)</td><td>R$ 1.096</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
+        <tr><td>Consumo IA OpenAI ($)</td><td>$682</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- DADOS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-dot" style="background:var(--dat)"></div>
+    <div class="section-label" style="color:var(--dat)">Dados</div>
+    <div class="section-line"></div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Indicador</th>
+        <th>Mar&ccedil;o</th><th>Abril</th><th>Maio <span style="opacity:.5">(parc.)</span></th>
+        <th>Mar&rarr;Abr</th><th>Abr&rarr;Mai</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Demandas planejadas</td><td>16</td><td>16</td><td>10</td><td><span class="badge nt">= est&aacute;vel</span></td><td><span class="badge am">&minus;38%</span></td></tr>
+        <tr><td>Demandas entregues</td><td>16</td><td>16</td><td>9</td><td><span class="badge nt">= est&aacute;vel</span></td><td><span class="badge rd">&minus;44%</span></td></tr>
+        <tr><td>Demandas atrasadas</td><td>0</td><td>0</td><td>1</td><td><span class="badge gn">= zero</span></td><td><span class="badge am">+1</span></td></tr>
+        <tr><td>Falhas na pipeline</td><td>52</td><td class="na">&mdash;</td><td>46</td><td><span class="badge na">sem dado</span></td><td><span class="badge na">sem dado</span></td></tr>
+        <tr><td>Falhas em dashboards</td><td>132</td><td class="na">&mdash;</td><td>4.383</td><td><span class="badge na">sem dado</span></td><td><span class="badge rd">+3.220%</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CHARTS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-dot" style="background:var(--muted)"></div>
+    <div class="section-label" style="color:var(--muted)">Visualiza&ccedil;&otilde;es</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title eng">Engenharia &mdash; entregas e bugs</div>
+      <div id="chart_eng" style="width:100%;height:200px"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title inf">Infra &mdash; incidentes mensais</div>
+      <div id="chart_inc" style="width:100%;height:200px"></div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-bottom:16px">
+    <div class="chart-title inf">Infra &mdash; falhas n8n por m&ecirc;s</div>
+    <div id="chart_n8n" style="width:100%;height:180px"></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title dat">Dados &mdash; demandas entregues vs. falhas em dashboards</div>
+    <div id="chart_dados" style="width:100%;height:180px"></div>
+  </div>
+</div>
+
+<!-- NO DATA -->
+<div class="nodata-section">
+  <div class="nodata-title">Indicadores sem dado em abril/maio (mudan&ccedil;a de estrutura)</div>
+  <div class="nodata-grid">
+    <div class="nodata-item"><span>Infra</span> <strong>Consumo Oracle &middot; base R$27.7k/m&ecirc;s</strong></div>
+    <div class="nodata-item"><span>Infra</span> <strong>Consumo IA Oracle &middot; base R$1.1k/m&ecirc;s</strong></div>
+    <div class="nodata-item"><span>Infra</span> <strong>Consumo IA OpenAI &middot; base $683/m&ecirc;s</strong></div>
+    <div class="nodata-item"><span>Infra</span> <strong>Mensagens trocadas &middot; base 12,6M/m&ecirc;s</strong></div>
+    <div class="nodata-item"><span>Infra</span> <strong>Logins plataforma &middot; base 39k/m&ecirc;s</strong></div>
+    <div class="nodata-item"><span>Eng</span> <strong>Bugs em backlog &middot; base 157 (fim mar)</strong></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-label">Engenharia, Infra e Dados &middot; Jetsales</div>
+  <div class="footer-label">Fonte: Google Drive &middot; Gerado em 20/05/2026</div>
+</div>
+
+<script>
+var BG   = '#FFFFFF';
+var GRID = '#DDD9D1';
+var TEXT = '#6B6860';
+var FONT = 'DM Mono';
+
+function baseOpts(title) {
+  return {
+    backgroundColor: 'transparent',
+    chartArea: {backgroundColor: 'transparent', left: 52, right: 16, top: 8, bottom: 36},
+    legend: {position: 'bottom', textStyle: {color: TEXT, fontSize: 10, fontName: FONT}},
+    hAxis: {textStyle: {color: TEXT, fontSize: 10, fontName: FONT}, gridlines: {color: 'transparent'}, baselineColor: GRID},
+    vAxis: {textStyle: {color: TEXT, fontSize: 10, fontName: FONT}, gridlines: {color: GRID}, baselineColor: GRID},
+    tooltip: {textStyle: {fontName: FONT, fontSize: 12}, showColorCode: true},
+    fontName: FONT,
+    animation: {startup: true, duration: 600, easing: 'out'}
+  };
+}
+
+function drawAll() {
+  drawEng();
+  drawInc();
+  drawN8n();
+  drawDados();
+}
+
+function drawEng() {
+  var data = google.visualization.arrayToDataTable([
+    ['M\u00eas', 'Tarefas entregues', 'Bugs corrigidos'],
+    ['Mar\u00e7o', 23, 48],
+    ['Abril',  23,  4],
+    ['Maio',   37, 27]
+  ]);
+  var opts = baseOpts('');
+  opts.colors = ['#16A34A', '#C0392B'];
+  opts.bar = {groupWidth: '55%'};
+  opts.legend = {position: 'bottom', textStyle: {color: TEXT, fontSize: 10, fontName: FONT}};
+  new google.visualization.ColumnChart(document.getElementById('chart_eng')).draw(data, opts);
+}
+
+function drawInc() {
+  var data = google.visualization.arrayToDataTable([
+    ['M\u00eas', 'Incidentes', {role: 'style'}],
+    ['Mar\u00e7o', 13, 'color: #1D6FB5'],
+    ['Abril',  15, 'color: #B45309'],
+    ['Maio',   16, 'color: #C0392B']
+  ]);
+  var opts = baseOpts('');
+  opts.legend = {position: 'none'};
+  opts.bar = {groupWidth: '50%'};
+  new google.visualization.ColumnChart(document.getElementById('chart_inc')).draw(data, opts);
+}
+
+function drawN8n() {
+  var data = google.visualization.arrayToDataTable([
+    ['M\u00eas', 'Falhas n8n'],
+    ['Mar\u00e7o', 152464],
+    ['Abril',    7426],
+    ['Maio',     28716]
+  ]);
+  var opts = baseOpts('');
+  opts.colors = ['#C0392B'];
+  opts.legend = {position: 'none'};
+  opts.lineWidth = 2;
+  opts.pointSize = 6;
+  opts.areaOpacity = 0.08;
+  opts.vAxis = {
+    textStyle: {color: TEXT, fontSize: 10, fontName: FONT},
+    gridlines: {color: GRID},
+    baselineColor: GRID,
+    format: 'short'
+  };
+  new google.visualization.AreaChart(document.getElementById('chart_n8n')).draw(data, opts);
+}
+
+function drawDados() {
+  var data = google.visualization.arrayToDataTable([
+    ['M\u00eas', 'Demandas entregues', 'Falhas dashboards (\u00f710)'],
+    ['Mar\u00e7o', 16, 13.2],
+    ['Abril',  16, null],
+    ['Maio',    9, 438.3]
+  ]);
+  var opts = baseOpts('');
+  opts.colors = ['#B45309', '#C0392B'];
+  opts.bar = {groupWidth: '55%'};
+  opts.legend = {position: 'bottom', textStyle: {color: TEXT, fontSize: 10, fontName: FONT}};
+  opts.tooltip = {textStyle: {fontName: FONT, fontSize: 12}, showColorCode: true};
+  new google.visualization.ColumnChart(document.getElementById('chart_dados')).draw(data, opts);
+}
+
+google.charts.load('current', {packages: ['corechart', 'bar']});
+google.charts.setCallback(drawAll);
+</script>
+</body>
+</html>
