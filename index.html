@@ -3,51 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard — Eng, Infra e Dados</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<title>Hub de KPIs</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:14px}
-.hdr{background:#fff;border-bottom:.5px solid #e0ddd5;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:8px;flex-wrap:wrap}
-.hdr h1{font-size:15px;font-weight:500}
-.hr{display:flex;align-items:center;gap:8px}
+body,div{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a}
+body{background:#f5f5f0;min-height:100vh}
+.hub{display:flex;min-height:100vh}
+.sidebar{width:200px;flex-shrink:0;background:#fff;border-right:.5px solid #e0ddd5;display:flex;flex-direction:column;padding:16px 0;position:sticky;top:0;height:100vh}
+.sb-logo{font-size:13px;font-weight:500;padding:0 16px 16px;border-bottom:.5px solid #e0ddd5;margin-bottom:8px}
+.sb-section{font-size:10px;font-weight:500;color:#999;text-transform:uppercase;letter-spacing:.07em;padding:12px 16px 6px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 16px;font-size:12px;font-weight:500;color:#666;cursor:pointer;transition:all .15s;border-left:2px solid transparent}
+.sb-item:hover{background:#f5f5f0;color:#1a1a1a}
+.sb-item.active{background:#f5f5f0;color:#1a1a1a;border-left-color:#1a1a1a}
+.sb-icon{font-size:15px}
+.content{flex:1;overflow-y:auto;padding:20px}
+.panel{display:none}.panel.visible{display:block}
+
+/* header */
+.pnl-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.pnl-hdr h1{font-size:16px;font-weight:500}
+.pnl-hr{display:flex;align-items:center;gap:8px}
 .upd{font-size:11px;color:#999}
-.btn{font-size:12px;padding:5px 11px;border:.5px solid #d0cdc5;border-radius:8px;background:#fff;cursor:pointer;color:#444;transition:all .15s;display:flex;align-items:center;gap:5px}
-.btn:hover{background:#f0efe8}
+.btn{font-size:12px;padding:5px 11px;border:.5px solid #d0cdc5;border-radius:8px;background:#fff;cursor:pointer;color:#555;display:flex;align-items:center;gap:5px;transition:all .15s}
+.btn:hover{background:#f5f5f0}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .spin{display:inline-block;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.filter-badge{background:#1a1a1a;color:#fff;border-radius:50%;font-size:10px;font-weight:500;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;margin-left:2px}
 
-/* filtro modal */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:200;align-items:flex-start;justify-content:flex-end}
+/* modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:200;align-items:flex-start;justify-content:flex-end}
 .modal-bg.open{display:flex}
-.modal{background:#fff;border:.5px solid #e0ddd5;border-radius:12px;padding:20px;margin:56px 16px 0 0;width:300px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.12)}
-.modal h2{font-size:13px;font-weight:500;margin-bottom:14px;color:#1a1a1a}
-.modal-section{margin-bottom:16px}
-.modal-section label{font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px}
-.pill-group{display:flex;flex-wrap:wrap;gap:6px}
-.pill{font-size:12px;padding:4px 11px;border-radius:20px;border:.5px solid #d0cdc5;background:#fff;cursor:pointer;color:#555;transition:all .15s}
-.pill:hover{background:#f0efe8}
+.modal{background:#fff;border:.5px solid #e0ddd5;border-radius:12px;padding:18px;margin:56px 16px 0 0;width:260px;box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.modal h2{font-size:13px;font-weight:500;margin-bottom:12px}
+.modal-section{margin-bottom:12px}
+.modal-section label{font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:7px}
+.pill-group{display:flex;flex-wrap:wrap;gap:5px}
+.pill{font-size:12px;padding:3px 10px;border-radius:20px;border:.5px solid #d0cdc5;background:#fff;cursor:pointer;color:#555;transition:all .15s}
+.pill:hover{background:#f5f5f0}
 .pill.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
-.modal-close{width:100%;margin-top:4px;padding:7px;border-radius:8px;border:.5px solid #d0cdc5;background:#f5f5f0;cursor:pointer;font-size:12px;color:#555}
-.modal-close:hover{background:#e8e7e0}
-.filter-badge{background:#1a1a1a;color:#fff;border-radius:50%;font-size:10px;font-weight:600;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;margin-left:2px}
+.modal-close{width:100%;margin-top:6px;padding:6px;border-radius:8px;border:.5px solid #d0cdc5;background:#f5f5f0;cursor:pointer;font-size:12px;color:#555}
 
-.wrap{padding:18px 20px;max-width:1100px;margin:0 auto}
-.tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
-.tab{font-size:12px;font-weight:500;padding:5px 13px;border-radius:8px;border:.5px solid #d0cdc5;background:#fff;color:#666;cursor:pointer;transition:all .15s}
+/* tabs */
+.tabs{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:5px 12px;border-radius:8px;border:.5px solid #d0cdc5;background:#fff;color:#666;cursor:pointer;transition:all .15s}
 .tab.active.all{background:#f0efe8;color:#1a1a1a;border-color:#bbb}
 .tab.active.eng{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}
 .tab.active.inf{background:#E6F1FB;color:#185FA5;border-color:#B5D4F4}
 .tab.active.dat{background:#FAEEDA;color:#854F0B;border-color:#FAC775}
 .sec{display:none}.sec.visible{display:block}
-.sl{font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin-bottom:4px}
-.card{background:#fff;border:.5px solid #e0ddd5;border-radius:10px;padding:12px 14px}
-.card .lbl{font-size:11px;color:#888;margin-bottom:5px}
-.card .val{font-size:21px;font-weight:500;line-height:1.1}
-.card .sub{font-size:11px;margin-top:5px}
-.bk{font-size:11px;font-weight:500;padding:2px 7px;border-radius:6px;display:inline-block;white-space:nowrap}
+
+/* cards / charts */
+.sl{font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.06em;margin:16px 0 9px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-bottom:4px}
+.card{background:#fff;border:.5px solid #e0ddd5;border-radius:10px;padding:11px 13px}
+.card .lbl{font-size:11px;color:#888;margin-bottom:4px}
+.card .val{font-size:20px;font-weight:500;line-height:1.1}
+.card .sub{font-size:11px;margin-top:4px}
+.bk{font-size:11px;font-weight:500;padding:2px 6px;border-radius:5px;display:inline-block;white-space:nowrap}
 .bk.gn{background:#EAF3DE;color:#3B6D11}
 .bk.rd{background:#FCEBEB;color:#A32D2D}
 .bk.am{background:#FAEEDA;color:#854F0B}
@@ -55,564 +69,646 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bk.na{background:#f0efe8;color:#aaa;font-size:10px}
 .tw{overflow-x:auto;margin-bottom:4px}
 table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden;border:.5px solid #e0ddd5}
-thead th{font-size:10.5px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;padding:7px 10px;border-bottom:.5px solid #e0ddd5;text-align:right;white-space:nowrap;background:#fafaf7}
+thead th{font-size:10px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;padding:6px 9px;border-bottom:.5px solid #e0ddd5;text-align:right;white-space:nowrap;background:#fafaf7}
 thead th:first-child{text-align:left}
-tbody td{padding:7px 10px;border-bottom:.5px solid #f0efe8;text-align:right;vertical-align:middle;white-space:nowrap}
-tbody td:first-child{text-align:left;color:#555;white-space:normal;max-width:220px}
+tbody td{padding:6px 9px;border-bottom:.5px solid #f0efe8;text-align:right;vertical-align:middle;white-space:nowrap}
+tbody td:first-child{text-align:left;color:#555;white-space:normal;max-width:200px}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:#fafaf7}
-.cw{background:#fff;border:.5px solid #e0ddd5;border-radius:10px;padding:14px;margin-bottom:4px}
-.leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:#666}
+.cw{background:#fff;border:.5px solid #e0ddd5;border-radius:10px;padding:13px;margin-bottom:4px}
+.leg{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:7px;font-size:11px;color:#666}
 .leg span{display:flex;align-items:center;gap:4px}
-.leg-sq{width:9px;height:9px;border-radius:2px;flex-shrink:0}
-.err{background:#FCEBEB;color:#A32D2D;padding:16px;border-radius:10px;font-size:13px;margin:20px 0;line-height:1.6}
-.ctx-bar{background:#fff;border:.5px solid #e0ddd5;border-radius:8px;padding:8px 13px;font-size:12px;color:#555;margin-bottom:16px;display:flex;align-items:center;gap:6px}
-.ctx-bar span{font-weight:500;color:#1a1a1a}
+.leg-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.ctx-bar{background:#fff;border:.5px solid #e0ddd5;border-radius:8px;padding:7px 12px;font-size:12px;color:#555;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.ctx-bar span{font-weight:500}
+
+/* CS */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-bottom:16px}
+.sc{background:#fff;border-radius:10px;padding:12px 14px;border:.5px solid #e0ddd5}
+.sc-lbl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:4px}
+.sc-val{font-size:24px;font-weight:500;line-height:1}
+.sc-desc{font-size:11px;color:#888;margin-top:3px}
+.dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:16px}
+.dc{background:#fff;border-radius:8px;padding:11px 13px;border:.5px solid #e0ddd5;display:flex;flex-direction:column;gap:5px;border-left:2.5px solid transparent}
+.dc.bad{border-left-color:#E24B4A}
+.dc.warn{border-left-color:#EF9F27}
+.dc.good{border-left-color:#3B6D11}
+.dc-name{font-size:12px;font-weight:500}
+.dc-vals{font-size:11px;color:#888;font-family:monospace}
+.dc-badge{display:inline-block;font-size:12px;font-weight:500;padding:2px 6px;border-radius:5px;width:fit-content}
+.dc-badge.bad{background:#FCEBEB;color:#A32D2D}
+.dc-badge.warn{background:#FAEEDA;color:#854F0B}
+.dc-badge.good{background:#EAF3DE;color:#3B6D11}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
+.cc{background:#fff;border-radius:10px;padding:14px;border:.5px solid #e0ddd5}
+.cc.full{grid-column:1/span 2}
+.cc-title{font-size:12px;font-weight:500;margin-bottom:5px}
+.tg{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-bottom:16px}
+.tc{background:#fff;border-radius:8px;padding:10px 12px;border:.5px solid #e0ddd5;display:flex;align-items:center;gap:9px}
+.ti-box{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:#FAEEDA;color:#854F0B}
+.ti-name{font-size:12px;font-weight:500}
+.ti-dev{font-size:11px;font-weight:500;margin-top:2px;color:#EF9F27}
+.tbl-card{background:#fff;border-radius:10px;padding:14px;border:.5px solid #e0ddd5;margin-bottom:4px;overflow-x:auto}
+.pill{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 6px;border-radius:4px}
+.pill.bad{background:#FCEBEB;color:#A32D2D}
+.pill.warn{background:#FAEEDA;color:#854F0B}
+.pill.ok{background:#EAF3DE;color:#3B6D11}
+.pill.neutral{background:#f0efe8;color:#666}
+.err{background:#FCEBEB;color:#A32D2D;padding:14px;border-radius:10px;font-size:13px;margin:16px 0;line-height:1.6}
 </style>
 </head>
 <body>
+<div class="hub">
 
-<!-- HEADER -->
-<div class="hdr">
-  <h1>📊 Engenharia, Infra e Dados</h1>
-  <div class="hr">
-    <span class="upd" id="upd">—</span>
-    <button class="btn" onclick="toggleFilter()" id="btnFilter">
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="10.5" r=".75" fill="currentColor" stroke="none"/></svg>
-      Período <span id="filterBadge" style="display:none" class="filter-badge">1</span>
-    </button>
-    <button class="btn" id="btnRefresh" onclick="loadData()">↻ Atualizar</button>
-  </div>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-logo">📊 Hub de KPIs</div>
+  <div class="sb-section">Setores</div>
+  <div class="sb-item active" id="sb-eng" onclick="switchPanel('eng')"><span class="sb-icon">⚙️</span> Engenharia</div>
+  <div class="sb-item" id="sb-cs" onclick="switchPanel('cs')"><span class="sb-icon">🎧</span> Sucesso do Cliente</div>
+  <div class="sb-section" style="margin-top:8px">Em breve</div>
+  <div class="sb-item" style="opacity:.4;cursor:not-allowed"><span class="sb-icon">📈</span> Comercial</div>
+  <div class="sb-item" style="opacity:.4;cursor:not-allowed"><span class="sb-icon">👥</span> Pessoas</div>
 </div>
 
-<!-- MODAL FILTRO -->
-<div class="modal-bg" id="modalBg" onclick="handleBgClick(event)">
-  <div class="modal">
-    <h2>Filtrar período</h2>
-    <div class="modal-section">
-      <label>Mês</label>
-      <div class="pill-group" id="pillMonths"></div>
-    </div>
-    <div class="modal-section" id="weekSection" style="display:none">
-      <label>Semana</label>
-      <div class="pill-group" id="pillWeeks"></div>
-    </div>
-    <button class="modal-close" onclick="closeFilter()">Fechar</button>
-  </div>
-</div>
+<!-- CONTENT -->
+<div class="content">
 
-<div id="root"><div style="text-align:center;padding:60px;color:#999;font-size:13px">Carregando dados…</div></div>
+  <!-- ══ ENGENHARIA ══ -->
+  <div class="panel visible" id="panel-eng">
+    <div class="pnl-hdr">
+      <h1>Engenharia, Infra e Dados</h1>
+      <div class="pnl-hr">
+        <span class="upd" id="eng-upd">—</span>
+        <button class="btn" onclick="toggleModal('eng')">🗓 Período <span id="eng-badge" style="display:none" class="filter-badge">1</span></button>
+        <button class="btn" id="eng-refresh" onclick="engLoad()">↻ Atualizar</button>
+      </div>
+    </div>
+    <div class="modal-bg" id="eng-modal" onclick="if(event.target===this)closeModal('eng')">
+      <div class="modal">
+        <h2>Filtrar período</h2>
+        <div class="modal-section"><label>Mês</label><div class="pill-group" id="eng-pill-months"></div></div>
+        <div class="modal-section" id="eng-week-section" style="display:none"><label>Semana</label><div class="pill-group" id="eng-pill-weeks"></div></div>
+        <button class="modal-close" onclick="closeModal('eng')">Fechar</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active all" onclick="engSetTab('all',this)">Visão geral</button>
+      <button class="tab eng" onclick="engSetTab('eng',this)">Engenharia</button>
+      <button class="tab inf" onclick="engSetTab('inf',this)">Infra</button>
+      <button class="tab dat" onclick="engSetTab('dat',this)">Dados</button>
+    </div>
+    <div id="eng-root"><div style="text-align:center;padding:40px;color:#999;font-size:13px">Carregando…</div></div>
+  </div>
+
+  <!-- ══ CS ══ -->
+  <div class="panel" id="panel-cs">
+    <div class="pnl-hdr">
+      <h1>Sucesso do Cliente</h1>
+      <div class="pnl-hr">
+        <span class="upd" id="cs-upd">—</span>
+        <button class="btn" onclick="toggleModal('cs')">🗓 Período <span id="cs-badge" class="filter-badge">1</span></button>
+        <button class="btn" id="cs-refresh" onclick="csLoad()">↻ Atualizar</button>
+      </div>
+    </div>
+    <div class="modal-bg" id="cs-modal" onclick="if(event.target===this)closeModal('cs')">
+      <div class="modal">
+        <h2>Filtrar período</h2>
+        <div class="modal-section"><label>Mês</label><div class="pill-group" id="cs-pill-months"></div></div>
+        <button class="modal-close" onclick="closeModal('cs')">Fechar</button>
+      </div>
+    </div>
+    <div class="sl" id="cs-sub-label" style="margin-top:0">vs. baseline (fev + mar 2026)</div>
+    <div class="sg" id="cs-summary"></div>
+    <div class="sl">Desvios detectados — desvio ≥ 20%</div>
+    <div class="dg" id="cs-desvios"></div>
+    <div class="cg">
+      <div class="cc full">
+        <div class="cc-title" id="cs-chart-title">Todos os desvios — período vs. baseline</div>
+        <div class="leg"><span><span class="leg-sq" style="background:#E24B4A"></span>Alerta</span><span><span class="leg-sq" style="background:#EF9F27"></span>Atenção</span><span><span class="leg-sq" style="background:#B4B2A9"></span>Estável</span></div>
+        <div style="position:relative;height:380px"><canvas id="cs-chart-desvios"></canvas></div>
+      </div>
+      <div class="cc">
+        <div class="cc-title">Atividade CS (mensal)</div>
+        <div class="leg"><span><span class="leg-sq" style="background:#185FA5;border-radius:50%"></span>Consultoria</span><span><span class="leg-sq" style="background:#EF9F27;border-radius:50%"></span>Suporte</span><span><span class="leg-sq" style="background:#E24B4A;border-radius:50%"></span>Reversão</span></div>
+        <div style="position:relative;height:220px"><canvas id="cs-chart-atv"></canvas></div>
+      </div>
+      <div class="cc">
+        <div class="cc-title">MRR Churn · Expandido · Retraído</div>
+        <div style="position:relative;height:220px"><canvas id="cs-chart-exp"></canvas></div>
+      </div>
+    </div>
+    <div class="sl">Em tendência — atenção (5–20%)</div>
+    <div class="tg" id="cs-trend"></div>
+    <div class="sl" id="cs-table-title" style="margin-top:16px">Detalhe por semana</div>
+    <div class="tbl-card"><table><thead id="cs-thead"></thead><tbody id="cs-tbody"></tbody></table></div>
+  </div>
+
+</div><!-- /content -->
+</div><!-- /hub -->
 
 <script>
-const SHEET_ID = '1f6QhW9hMR7EBq5KrgKhFxVEHvyvjxbcshcevSYJkVi8';
+const SHEET_ID='1f6QhW9hMR7EBq5KrgKhFxVEHvyvjxbcshcevSYJkVi8';
+const CS_SHEET_ID='1Gj4YIRNl8LjdPiGGpFTEsjwNV1h2NWpff2GDLBLL55E';
 
-// ── Nomes das abas conhecidos — adicione novas abas aqui ─────────────────────
-// O sistema tentará buscar automaticamente qualquer aba listada.
-// Para adicionar um novo mês, basta adicionar ao array abaixo.
-const KNOWN_SHEETS = [
-  { key:'nov',  label:'Novembro',   sheet:'Novembro'   },
-  { key:'dez',  label:'Dezembro',   sheet:'Dezembro'   },
-  { key:'jan',  label:'Janeiro',    sheet:'Jan/2026'   },
-  { key:'fev',  label:'Fevereiro',  sheet:'Fev/2026'   },
-  { key:'mar',  label:'Março',      sheet:'Mar/2026'   },
-  { key:'abr',  label:'Abril',      sheet:'Abril/2026' },
-  { key:'mai',  label:'Maio',       sheet:'Maio/2026'  },
-  // { key:'jun', label:'Junho', sheet:'Jun/2026' }, // ← descomente quando criar a aba
-];
-
-// Estado do filtro
-let state = {
-  allData: {},        // key → { monthly, weekly }
-  availableSheets: [],// abas que existem na planilha
-  selMonth: null,     // chave do mês selecionado
-  selWeek: null,      // label da semana selecionada (ou null = mensal)
-};
-
-// ── Fetch CSV ─────────────────────────────────────────────────────────────────
-async function fetchSheet(sheetName) {
-  const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
-    '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(sheetName);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const text = await res.text();
-  return parseCSV(text);
-}
-
-function parseCSV(text) {
-  return text.trim().split('\n').map(line => {
-    const cols = []; let cur = ''; let inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') { inQ = !inQ; }
-      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else { cur += ch; }
-    }
-    cols.push(cur.trim());
-    return cols;
+async function fetchCSSheet(sheetName){
+  const url='https://docs.google.com/spreadsheets/d/'+CS_SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(sheetName);
+  const r=await fetch(url);
+  if(!r.ok)throw new Error('HTTP '+r.status+': '+sheetName);
+  const text=await r.text();
+  return text.trim().split('\n').map(line=>{
+    const cols=[];let cur='';let inQ=false;
+    for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}else{cur+=ch;}}
+    cols.push(cur.trim());return cols;
   });
 }
 
-// ── Extrai valor: pega última célula não vazia da linha ───────────────────────
-function extract(rows, ...keywords) {
-  const kws = keywords.map(k => k.toLowerCase());
-  for (const r of rows) {
-    const lbl = (r[0] || '').toLowerCase().trim();
-    if (!lbl) continue;
-    if (!kws.some(k => lbl.includes(k))) continue;
-    for (let i = r.length - 1; i >= 1; i--) {
-      const v = (r[i] || '').trim();
-      if (v && v !== '-' && v !== '\\-' && v !== '—' && !v.startsWith('#')) return toNum(v);
+// ── fetch CSV ─────────────────────────────────────────────────────────────────
+async function fetchSheet(sheetName){
+  const url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(sheetName);
+  const r=await fetch(url);
+  if(!r.ok)throw new Error('HTTP '+r.status+': '+sheetName);
+  const text=await r.text();
+  return text.trim().split('\n').map(line=>{
+    const cols=[];let cur='';let inQ=false;
+    for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}else{cur+=ch;}}
+    cols.push(cur.trim());return cols;
+  });
+}
+
+function extract(rows,...keywords){
+  const kws=keywords.map(k=>k.toLowerCase());
+  for(const r of rows){
+    const lbl=(r[0]||'').toLowerCase().trim();
+    if(!lbl)continue;
+    if(!kws.some(k=>lbl.includes(k)))continue;
+    for(let i=r.length-1;i>=1;i--){
+      const v=(r[i]||'').trim();
+      if(v&&v!=='-'&&v!=='\\-'&&v!=='—'&&!v.startsWith('#'))return toNum(v);
     }
   }
   return null;
 }
 
-// Extrai valor de uma coluna específica (para semanas)
-function extractCol(rows, keyword, colIdx) {
-  const kw = keyword.toLowerCase();
-  for (const r of rows) {
-    const lbl = (r[0] || '').toLowerCase().trim();
-    if (lbl.includes(kw) && r[colIdx] !== undefined) {
-      const v = (r[colIdx] || '').trim();
-      if (v && v !== '-' && v !== '\\-' && v !== '—' && !v.startsWith('#')) return toNum(v);
-    }
-  }
-  return null;
+function toNum(v){
+  if(v==null)return null;
+  const s=String(v).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.').trim();
+  const n=parseFloat(s);return isNaN(n)?null:n;
 }
 
-// Detecta cabeçalhos de semana de uma aba (linha que começa com "Indicador")
-function detectWeeks(rows) {
-  for (const r of rows) {
-    if ((r[0] || '').toLowerCase().trim() === 'indicador') {
-      return r.slice(1).filter(h => h && h.toLowerCase().includes('semana'));
-    }
-  }
-  return [];
+// ════════════════════════════════════════════════
+// PANEL SWITCH
+// ════════════════════════════════════════════════
+function switchPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('visible'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('visible');
+  document.getElementById('sb-'+name).classList.add('active');
 }
 
-// Índices das colunas de semana
-function weekColIndices(rows) {
-  for (const r of rows) {
-    if ((r[0] || '').toLowerCase().trim() === 'indicador') {
-      const res = [];
-      r.forEach((h, i) => { if (i > 0 && h && h.toLowerCase().includes('semana')) res.push(i); });
-      return { headers: r.slice(1).filter(h => h && h.toLowerCase().includes('semana')), indices: res };
-    }
-  }
-  return { headers: [], indices: [] };
-}
+function toggleModal(id){document.getElementById(id+'-modal').classList.toggle('open');if(id==='eng')engBuildFilter();else csBuildFilter();}
+function closeModal(id){document.getElementById(id+'-modal').classList.remove('open');}
 
-function toNum(v) {
-  if (v == null) return null;
-  const s = String(v).replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.').trim();
-  const n = parseFloat(s);
-  return isNaN(n) ? null : n;
-}
+// ════════════════════════════════════════════════
+// ENGENHARIA
+// ════════════════════════════════════════════════
+// Abas conhecidas — adicione novos meses aqui
+const ENG_SHEETS=[
+  {key:'nov',label:'Novembro',sheet:'Novembro'},
+  {key:'dez',label:'Dezembro',sheet:'Dezembro'},
+  {key:'jan',label:'Janeiro', sheet:'Jan/2026'},
+  {key:'fev',label:'Fevereiro',sheet:'Fev/2026'},
+  {key:'mar',label:'Março',   sheet:'Mar/2026'},
+  {key:'abr',label:'Abril',   sheet:'Abril/2026'},
+  {key:'mai',label:'Maio',    sheet:'Maio/2026'},
+  // {key:'jun',label:'Junho',sheet:'Jun/2026'}, // ← descomente quando criar a aba
+];
 
-function fmt(v) {
-  if (v === null || v === undefined) return '—';
-  if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(1) + 'M';
-  return v.toLocaleString('pt-BR');
-}
+let engData={},engAvail=[],engSelMonth=null,engSelWeek=null,engCharts={};
 
-function pct(a, b) {
-  if (a == null || b == null || a === 0) return null;
-  return Math.round(((b - a) / Math.abs(a)) * 100);
-}
-
-function bk(v, dir) {
-  if (v === null) return '<span class="bk na">sem dado</span>';
-  if (v === 0) return '<span class="bk nt">=</span>';
-  const pos = v > 0;
-  const cls = dir === 'good' ? (pos ? 'gn' : 'rd') : (pos ? 'rd' : 'gn');
-  return `<span class="bk ${cls}">${pos ? '+' : ''}${v}%</span>`;
-}
-
-// ── Parse mensal ──────────────────────────────────────────────────────────────
-function parseMonthly(rows) {
-  return {
-    eng_tarefas:   extract(rows, 'tarefas/story entregues', 'tarefas/story'),
-    eng_bugs:      extract(rows, 'bugs corrigidos'),
-    eng_backlog:   extract(rows, 'bugs em backlog'),
-    eng_wip:       extract(rows, 'em andamento', 'demandas em andamento'),
-    inf_inc:       extract(rows, 'incidentes (infra', 'incidentes no mês', 'incidentes críticos'),
-    inf_n8n:       extract(rows, 'falhas nos workflows do n8n', 'falhas em workflows do n8n por infra (crashes)'),
-    inf_n8n_infra: extract(rows, 'falhas em workflows do n8n por infra (crashes)'),
-    inf_n3:        extract(rows, 'demandas n3'),
-    inf_msg:       extract(rows, 'mensagens trocadas'),
-    inf_logins:    extract(rows, 'logins'),
-    inf_oracle:    extract(rows, 'consumo de nuvem em créditos ($$) - oracle'),
-    inf_oracle_ia: extract(rows, 'consumo de ia em créditos ($$) - oracle'),
-    inf_openai:    extract(rows, 'consumo de ia em créditos ($$) - open'),
-    dat_plan:      extract(rows, 'demandas planejadas'),
-    dat_entr:      extract(rows, 'demandas entregues'),
-    dat_atrs:      extract(rows, 'demandas atrasadas'),
-    dat_pipe:      extract(rows, 'falhas na execução da pipeline'),
-    dat_dash:      extract(rows, 'falhas em dashboards'),
+function parseEngMonth(rows){
+  return{
+    eng_tarefas: extract(rows,'tarefas/story entregues','tarefas/story'),
+    eng_bugs:    extract(rows,'bugs corrigidos'),
+    eng_backlog: extract(rows,'bugs em backlog'),
+    eng_wip:     extract(rows,'em andamento','demandas em andamento'),
+    inf_inc:     extract(rows,'incidentes (infra','incidentes no mês','incidentes críticos'),
+    inf_n8n:     extract(rows,'falhas nos workflows do n8n','falhas em workflows do n8n por infra (crashes)'),
+    inf_n8n_inf: extract(rows,'falhas em workflows do n8n por infra (crashes)'),
+    inf_n3:      extract(rows,'demandas n3'),
+    inf_msg:     extract(rows,'mensagens trocadas'),
+    inf_logins:  extract(rows,'logins'),
+    inf_oracle:  extract(rows,'consumo de nuvem em créditos ($$) - oracle'),
+    inf_ora_ia:  extract(rows,'consumo de ia em créditos ($$) - oracle'),
+    inf_openai:  extract(rows,'consumo de ia em créditos ($$) - open'),
+    dat_plan:    extract(rows,'demandas planejadas'),
+    dat_entr:    extract(rows,'demandas entregues'),
+    dat_atrs:    extract(rows,'demandas atrasadas'),
+    dat_pipe:    extract(rows,'falhas na execução da pipeline'),
+    dat_dash:    extract(rows,'falhas em dashboards'),
   };
 }
 
-// ── Parse semanal ─────────────────────────────────────────────────────────────
-function parseWeekly(rows) {
-  const { headers, indices } = weekColIndices(rows);
-  return headers.map((h, i) => ({
-    label: h,
-    data: {
-      eng_tarefas:   extractCol(rows, 'tarefas/story entregues', indices[i]),
-      eng_bugs:      extractCol(rows, 'bugs corrigidos', indices[i]),
-      eng_backlog:   extractCol(rows, 'bugs em backlog', indices[i]),
-      eng_wip:       extractCol(rows, 'em andamento', indices[i]),
-      inf_inc:       extractCol(rows, 'incidentes', indices[i]),
-      inf_n8n:       extractCol(rows, 'falhas nos workflows', indices[i]),
-      inf_n8n_infra: extractCol(rows, 'falhas em workflows do n8n por infra', indices[i]),
-      inf_n3:        extractCol(rows, 'demandas n3', indices[i]),
-      dat_plan:      extractCol(rows, 'demandas planejadas', indices[i]),
-      dat_entr:      extractCol(rows, 'demandas entregues', indices[i]),
-      dat_atrs:      extractCol(rows, 'demandas atrasadas', indices[i]),
-      dat_pipe:      extractCol(rows, 'falhas na execução da pipeline', indices[i]),
-      dat_dash:      extractCol(rows, 'falhas em dashboards', indices[i]),
+function parseEngWeekly(rows){
+  // detecta headers de semana
+  let hRow=null;
+  for(const r of rows){if((r[0]||'').toLowerCase().trim()==='indicador'){hRow=r;break;}}
+  if(!hRow)return[];
+  const idxs=[];const labs=[];
+  hRow.forEach((h,i)=>{if(i>0&&h&&h.toLowerCase().includes('semana')){idxs.push(i);labs.push(h);}});
+  return labs.map((lab,i)=>({
+    label:lab,
+    data:{
+      eng_tarefas:extractCol(rows,'tarefas/story entregues',idxs[i]),
+      eng_bugs:   extractCol(rows,'bugs corrigidos',idxs[i]),
+      eng_backlog:extractCol(rows,'bugs em backlog',idxs[i]),
+      eng_wip:    extractCol(rows,'em andamento',idxs[i]),
+      inf_inc:    extractCol(rows,'incidentes',idxs[i]),
+      inf_n8n:    extractCol(rows,'falhas nos workflows',idxs[i]),
+      inf_n8n_inf:extractCol(rows,'falhas em workflows do n8n por infra',idxs[i]),
+      inf_n3:     extractCol(rows,'demandas n3',idxs[i]),
+      dat_plan:   extractCol(rows,'demandas planejadas',idxs[i]),
+      dat_entr:   extractCol(rows,'demandas entregues',idxs[i]),
+      dat_atrs:   extractCol(rows,'demandas atrasadas',idxs[i]),
+      dat_pipe:   extractCol(rows,'falhas na execução da pipeline',idxs[i]),
+      dat_dash:   extractCol(rows,'falhas em dashboards',idxs[i]),
     }
   }));
 }
 
-// ── Gráficos ──────────────────────────────────────────────────────────────────
-let charts = {};
-function dch() { Object.values(charts).forEach(c => c.destroy()); charts = {}; }
-
-function mkBar(id, labels, datasets) {
-  const el = document.getElementById(id); if (!el) return;
-  charts[id] = new Chart(el, { type:'bar', data:{labels,datasets},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{ticks:{font:{size:11},color:'#999'},grid:{display:false}},
-              y:{ticks:{font:{size:11},color:'#999',callback:v=>Math.abs(v)>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,.06)'},beginAtZero:true}}}});
-}
-function mkLine(id, labels, datasets) {
-  const el = document.getElementById(id); if (!el) return;
-  charts[id] = new Chart(el, { type:'line', data:{labels,datasets},
-    options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false}},
-      scales:{x:{ticks:{font:{size:11},color:'#999'},grid:{display:false}},
-              y:{ticks:{font:{size:11},color:'#999',callback:v=>Math.abs(v)>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,.06)'}}}}});
+function extractCol(rows,keyword,colIdx){
+  const kw=keyword.toLowerCase();
+  for(const r of rows){
+    if((r[0]||'').toLowerCase().includes(kw)&&r[colIdx]!==undefined){
+      const v=(r[colIdx]||'').trim();
+      if(v&&v!=='-'&&v!=='—'&&!v.startsWith('#'))return toNum(v);
+    }
+  }
+  return null;
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
-function getKPIs() {
-  const { allData, availableSheets, selMonth, selWeek } = state;
-  if (selMonth && selWeek) {
-    // visão semanal de um mês
-    const weeks = allData[selMonth]?.weekly || [];
-    const wk = weeks.find(w => w.label === selWeek);
-    return { mode:'week', label: selMonth + ' · ' + selWeek, single: wk?.data || {} };
+async function engLoad(){
+  const btn=document.getElementById('eng-refresh');
+  btn.disabled=true;btn.innerHTML='<span class="spin">↻</span> Buscando…';
+  try{
+    const results=await Promise.allSettled(ENG_SHEETS.map(s=>fetchSheet(s.sheet).then(rows=>({key:s.key,rows}))));
+    engData={};engAvail=[];
+    for(const r of results){
+      if(r.status==='fulfilled'){
+        const{key,rows}=r.value;
+        engData[key]={monthly:parseEngMonth(rows),weekly:parseEngWeekly(rows)};
+        engAvail.push(key);
+      }
+    }
+    if(engSelMonth&&!engAvail.includes(engSelMonth)){engSelMonth=null;engSelWeek=null;}
+    engRender();
+    document.getElementById('eng-upd').textContent='Atualizado '+new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    document.getElementById('eng-root').innerHTML='<div class="err">⚠️ Erro: <b>'+e.message+'</b><br>Verifique se a planilha está pública.</div>';
   }
-  if (selMonth) {
-    // visão mensal de um mês específico
-    return { mode:'single', label: KNOWN_SHEETS.find(s=>s.key===selMonth)?.label || selMonth,
-             single: allData[selMonth]?.monthly || {} };
+  btn.disabled=false;btn.innerHTML='↻ Atualizar';
+}
+
+function efmt(v){if(v==null)return'—';if(Math.abs(v)>=1e6)return(v/1e6).toFixed(1)+'M';return v.toLocaleString('pt-BR');}
+function epct(a,b){if(a==null||b==null||a===0)return null;return Math.round(((b-a)/Math.abs(a))*100);}
+function ebk(v,dir){if(v===null)return'<span class="bk na">sem dado</span>';if(v===0)return'<span class="bk nt">=</span>';const pos=v>0;const cls=dir==='good'?(pos?'gn':'rd'):(pos?'rd':'gn');return'<span class="bk '+cls+'">'+(pos?'+':'')+v+'%</span>';}
+function edch(){Object.values(engCharts).forEach(c=>c.destroy());engCharts={};}
+function emkBar(id,labels,datasets){const el=document.getElementById(id);if(!el)return;engCharts[id]=new Chart(el,{type:'bar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false}},y:{ticks:{font:{size:10},color:'#999',callback:v=>Math.abs(v)>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,.06)'},beginAtZero:true}}}});}
+function emkLine(id,labels,datasets){const el=document.getElementById(id);if(!el)return;engCharts[id]=new Chart(el,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,spanGaps:true,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false}},y:{ticks:{font:{size:10},color:'#999',callback:v=>Math.abs(v)>=1000?Math.round(v/1000)+'k':v},grid:{color:'rgba(0,0,0,.06)'}}}}});}
+
+function engSetTab(t,el){
+  document.querySelectorAll('#panel-eng .tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#eng-root .sec').forEach(s=>s.classList.remove('visible'));
+  el.classList.add('active');
+  const s=document.getElementById('eng-sec-'+t);if(s)s.classList.add('visible');
+}
+
+function engRender(){
+  edch();
+  if(engSelMonth&&engSelWeek){
+    const wk=engData[engSelMonth].weekly.find(w=>w.label===engSelWeek);
+    engRenderSingle(wk?wk.data:{},ENG_SHEETS.find(s=>s.key===engSelMonth).label+' · '+engSelWeek,true);
+  }else if(engSelMonth){
+    engRenderSingle(engData[engSelMonth].monthly,ENG_SHEETS.find(s=>s.key===engSelMonth).label,false);
+  }else{
+    engRenderCompare();
   }
-  // visão comparativa padrão (últimos 3 meses disponíveis)
-  const last3 = availableSheets.slice(-3);
-  return {
-    mode: 'compare',
-    months: last3.map(k => ({ key:k, label: KNOWN_SHEETS.find(s=>s.key===k)?.label || k, d: allData[k]?.monthly || {} }))
+}
+
+function engRenderCompare(){
+  const last3=engAvail.slice(-3);
+  const months=last3.map(k=>({key:k,label:ENG_SHEETS.find(s=>s.key===k).label,d:engData[k].monthly}));
+  const M=months.map(m=>m.label);
+  const C=['#B5D4F4','#9FE1CB','#FAC775'];const B=['#378ADD','#1D9E75','#EF9F27'];
+  const g=k=>months.map(m=>m.d[k]);
+  const ev=g('eng_tarefas'),eb=g('eng_bugs'),ew=g('eng_wip'),ebk2=g('eng_backlog');
+  const ii=g('inf_inc'),in8=g('inf_n8n'),in8i=g('inf_n8n_inf');
+  const dp=g('dat_plan'),de=g('dat_entr'),da=g('dat_atrs'),dpi=g('dat_pipe'),dd=g('dat_dash');
+  const last=months.length-1,prev=last-1;
+  const lbl=months[last]?.label||'';
+  const taxa=dp[last]>0?Math.round(de[last]/dp[last]*100):null;
+  const ln=(c,bg)=>({borderColor:c,backgroundColor:bg,borderWidth:2,pointRadius:4,pointBackgroundColor:c,fill:true,tension:0.3});
+  document.getElementById('eng-root').innerHTML=`
+  <div class="sec visible" id="eng-sec-all">
+    <div class="sl">Destaques — ${lbl}</div>
+    <div class="cards">
+      <div class="card"><div class="lbl">Tarefas entregues</div><div class="val">${efmt(ev[last])}</div><div class="sub">${ebk(epct(ev[prev],ev[last]),'good')} vs anterior</div></div>
+      <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${efmt(eb[last])}</div><div class="sub">${ebk(epct(eb[prev],eb[last]),'good')} vs anterior</div></div>
+      <div class="card"><div class="lbl">Incidentes Infra</div><div class="val">${efmt(ii[last])}</div><div class="sub">${ebk(epct(ii[prev],ii[last]),'bad')} vs anterior</div></div>
+      <div class="card"><div class="lbl">Falhas n8n</div><div class="val" style="font-size:16px">${efmt(in8[last])}</div><div class="sub">${ebk(epct(in8[prev],in8[last]),'bad')} vs anterior</div></div>
+      <div class="card"><div class="lbl">Demandas Dados</div><div class="val">${efmt(de[last])}/${efmt(dp[last])}</div><div class="sub">${taxa!==null?'<span class="bk am">'+taxa+'%</span> taxa':''}</div></div>
+      <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:16px">${efmt(dd[last])}</div><div class="sub">${ebk(epct(dd[0],dd[last]),'bad')} vs ${months[0]?.label||''}</div></div>
+    </div>
+    <div class="sl">Tarefas, bugs e incidentes</div>
+    <div class="leg">${M.map((m,i)=>'<span><span class="leg-sq" style="background:'+C[i]+'"></span>'+m+'</span>').join('')}</div>
+    <div class="cw" style="height:220px"><canvas id="ec-all-bar"></canvas></div>
+    <div class="sl">Falhas n8n — evolução</div>
+    <div class="cw" style="height:170px"><canvas id="ec-all-n8n"></canvas></div>
+  </div>
+  <div class="sec" id="eng-sec-eng">
+    <div class="sl" style="color:#3B6D11">Comparativo mensal</div>
+    <div class="cards">
+      <div class="card"><div class="lbl">Tarefas (${lbl})</div><div class="val">${efmt(ev[last])}</div><div class="sub">${ebk(epct(ev[prev],ev[last]),'good')} vs anterior</div></div>
+      <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${efmt(eb[last])}</div><div class="sub">${ebk(epct(eb[prev],eb[last]),'good')} vs anterior</div></div>
+      <div class="card"><div class="lbl">Backlog bugs</div><div class="val">${efmt(ebk2[last])}</div><div class="sub" style="font-size:11px;color:#888">${months[0]?.label}: ${efmt(ebk2[0])}</div></div>
+      <div class="card"><div class="lbl">WIP</div><div class="val">${efmt(ew[last])}</div><div class="sub">${ebk(epct(ew[prev],ew[last]),'bad')} vs anterior</div></div>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th style="text-align:left">Indicador</th>${M.map(m=>'<th>'+m+'</th>').join('')}<th>Último Δ</th></tr></thead>
+      <tbody>
+        <tr><td>Tarefas/Story entregues</td>${ev.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td>${ebk(epct(ev[prev],ev[last]),'good')}</td></tr>
+        <tr><td>Bugs corrigidos</td>${eb.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td>${ebk(epct(eb[prev],eb[last]),'good')}</td></tr>
+        <tr><td>Bugs em backlog</td>${ebk2.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td><span class="bk na">sem dado</span></td></tr>
+        <tr><td>WIP</td>${ew.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td>${ebk(epct(ew[prev],ew[last]),'bad')}</td></tr>
+      </tbody>
+    </table></div>
+    <div class="sl">Evolução</div>
+    <div class="leg"><span><span class="leg-sq" style="background:#639922"></span>Tarefas</span><span><span class="leg-sq" style="background:#E24B4A;border-radius:50%"></span>Bugs</span><span><span class="leg-sq" style="background:#888;border-radius:50%"></span>WIP</span></div>
+    <div class="cw" style="height:210px"><canvas id="ec-eng-line"></canvas></div>
+  </div>
+  <div class="sec" id="eng-sec-inf">
+    <div class="sl" style="color:#185FA5">Comparativo mensal</div>
+    <div class="cards">
+      <div class="card"><div class="lbl">Incidentes (${lbl})</div><div class="val">${efmt(ii[last])}</div><div class="sub">${ebk(epct(ii[prev],ii[last]),'bad')} vs anterior</div></div>
+      <div class="card"><div class="lbl">Falhas n8n total</div><div class="val" style="font-size:16px">${efmt(in8[last])}</div><div class="sub">${ebk(epct(in8[prev],in8[last]),'bad')} vs anterior</div></div>
+      <div class="card"><div class="lbl">Falhas n8n Infra</div><div class="val" style="font-size:16px">${efmt(in8i[last])}</div><div class="sub">${ebk(epct(in8i[prev],in8i[last]),'bad')} vs anterior</div></div>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th style="text-align:left">Indicador</th>${M.map(m=>'<th>'+m+'</th>').join('')}<th>Último Δ</th></tr></thead>
+      <tbody>
+        <tr><td>Incidentes</td>${ii.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td>${ebk(epct(ii[prev],ii[last]),'bad')}</td></tr>
+        <tr><td>Falhas n8n (total)</td>${in8.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td>${ebk(epct(in8[prev],in8[last]),'bad')}</td></tr>
+        <tr><td>Falhas n8n (Infra)</td>${in8i.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td>${ebk(epct(in8i[prev],in8i[last]),'bad')}</td></tr>
+      </tbody>
+    </table></div>
+    <div class="sl">Falhas n8n</div><div class="cw" style="height:170px"><canvas id="ec-inf-n8n"></canvas></div>
+    <div class="sl">Incidentes</div><div class="cw" style="height:160px"><canvas id="ec-inf-inc"></canvas></div>
+  </div>
+  <div class="sec" id="eng-sec-dat">
+    <div class="sl" style="color:#854F0B">Comparativo mensal</div>
+    <div class="cards">
+      <div class="card"><div class="lbl">Entregues/Plan.</div><div class="val">${efmt(de[last])}/${efmt(dp[last])}</div><div class="sub">${taxa!==null?'<span class="bk am">'+taxa+'%</span> taxa':''}</div></div>
+      <div class="card"><div class="lbl">Atrasadas</div><div class="val">${efmt(da[last])}</div><div class="sub">${ebk(epct(da[prev],da[last]),'bad')} vs anterior</div></div>
+      <div class="card"><div class="lbl">Falhas pipeline</div><div class="val">${efmt(dpi[last])}</div></div>
+      <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:16px">${efmt(dd[last])}</div><div class="sub">${ebk(epct(dd[0],dd[last]),'bad')} vs ${months[0]?.label}</div></div>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th style="text-align:left">Indicador</th>${M.map(m=>'<th>'+m+'</th>').join('')}<th>Último Δ</th></tr></thead>
+      <tbody>
+        <tr><td>Demandas planejadas</td>${dp.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td>${ebk(epct(dp[prev],dp[last]),'good')}</td></tr>
+        <tr><td>Demandas entregues</td>${de.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td>${ebk(epct(de[prev],de[last]),'good')}</td></tr>
+        <tr><td>Demandas atrasadas</td>${da.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td>${ebk(epct(da[prev],da[last]),'bad')}</td></tr>
+        <tr><td>Falhas pipeline</td>${dpi.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td><span class="bk na">sem dado</span></td></tr>
+        <tr><td>Falhas dashboards</td>${dd.map(v=>'<td>'+efmt(v)+'</td>').join('')}<td>${ebk(epct(dd[0],dd[last]),'bad')}</td></tr>
+      </tbody>
+    </table></div>
+    <div class="sl">Planejadas vs entregues</div>
+    <div class="leg"><span><span class="leg-sq" style="background:#FAC775"></span>Planejadas</span><span><span class="leg-sq" style="background:#9FE1CB"></span>Entregues</span></div>
+    <div class="cw" style="height:180px"><canvas id="ec-dat-bar"></canvas></div>
+  </div>`;
+  setTimeout(()=>{
+    emkBar('ec-all-bar',['Tarefas','Bugs','Incidentes'],months.map((m,i)=>({label:m.label,data:[m.d.eng_tarefas,m.d.eng_bugs,m.d.inf_inc],backgroundColor:C[i],borderColor:B[i],borderWidth:1,borderRadius:4})));
+    emkLine('ec-all-n8n',M,[{label:'n8n',data:in8,...ln('#E24B4A','rgba(226,75,74,.07)')}]);
+    emkLine('ec-eng-line',M,[{label:'T',data:ev,...ln('#639922','rgba(99,153,34,.07)')},{label:'B',data:eb,borderColor:'#E24B4A',borderWidth:2,pointRadius:4,pointBackgroundColor:'#E24B4A',pointStyle:'triangle',fill:false,tension:0.3},{label:'W',data:ew,borderColor:'#888',borderDash:[5,4],borderWidth:1.5,pointRadius:3,pointBackgroundColor:'#888',fill:false,tension:0.3}]);
+    emkLine('ec-inf-n8n',M,[{label:'n8n',data:in8,...ln('#E24B4A','rgba(226,75,74,.07)')}]);
+    emkBar('ec-inf-inc',M,[{label:'Inc',data:ii,backgroundColor:C,borderColor:B,borderWidth:1,borderRadius:4}]);
+    emkBar('ec-dat-bar',M,[{label:'P',data:dp,backgroundColor:'#FAC775',borderColor:'#EF9F27',borderWidth:1,borderRadius:4},{label:'E',data:de,backgroundColor:'#9FE1CB',borderColor:'#1D9E75',borderWidth:1,borderRadius:4}]);
+  },50);
+}
+
+function engRenderSingle(d,label,isWeek){
+  const taxa=d.dat_plan>0?Math.round(d.dat_entr/d.dat_plan*100):null;
+  document.getElementById('eng-root').innerHTML=`
+  <div class="ctx-bar">📅 <span>${label}</span> · ${isWeek?'visão semanal':'visão mensal'}</div>
+  <div class="sec visible" id="eng-sec-all"><div class="sl">Resumo</div><div class="cards">
+    <div class="card"><div class="lbl">Tarefas</div><div class="val">${efmt(d.eng_tarefas)}</div></div>
+    <div class="card"><div class="lbl">Bugs</div><div class="val">${efmt(d.eng_bugs)}</div></div>
+    <div class="card"><div class="lbl">Incidentes</div><div class="val">${efmt(d.inf_inc)}</div></div>
+    <div class="card"><div class="lbl">Falhas n8n</div><div class="val" style="font-size:16px">${efmt(d.inf_n8n)}</div></div>
+    <div class="card"><div class="lbl">Demandas</div><div class="val">${efmt(d.dat_entr)}/${efmt(d.dat_plan)}</div><div class="sub">${taxa!==null?'<span class="bk am">'+taxa+'%</span>':''}</div></div>
+    <div class="card"><div class="lbl">Falhas dash</div><div class="val" style="font-size:16px">${efmt(d.dat_dash)}</div></div>
+  </div></div>
+  <div class="sec" id="eng-sec-eng"><div class="sl" style="color:#3B6D11">Engenharia</div><div class="cards">
+    <div class="card"><div class="lbl">Tarefas</div><div class="val">${efmt(d.eng_tarefas)}</div></div>
+    <div class="card"><div class="lbl">Bugs</div><div class="val">${efmt(d.eng_bugs)}</div></div>
+    <div class="card"><div class="lbl">Backlog</div><div class="val">${efmt(d.eng_backlog)}</div></div>
+    <div class="card"><div class="lbl">WIP</div><div class="val">${efmt(d.eng_wip)}</div></div>
+  </div></div>
+  <div class="sec" id="eng-sec-inf"><div class="sl" style="color:#185FA5">Infra</div><div class="cards">
+    <div class="card"><div class="lbl">Incidentes</div><div class="val">${efmt(d.inf_inc)}</div></div>
+    <div class="card"><div class="lbl">Falhas n8n</div><div class="val" style="font-size:16px">${efmt(d.inf_n8n)}</div></div>
+    <div class="card"><div class="lbl">N3</div><div class="val">${efmt(d.inf_n3)}</div></div>
+  </div></div>
+  <div class="sec" id="eng-sec-dat"><div class="sl" style="color:#854F0B">Dados</div><div class="cards">
+    <div class="card"><div class="lbl">Planejadas</div><div class="val">${efmt(d.dat_plan)}</div></div>
+    <div class="card"><div class="lbl">Entregues</div><div class="val">${efmt(d.dat_entr)}</div></div>
+    <div class="card"><div class="lbl">Atrasadas</div><div class="val">${efmt(d.dat_atrs)}</div></div>
+    <div class="card"><div class="lbl">Pipeline</div><div class="val">${efmt(d.dat_pipe)}</div></div>
+    <div class="card"><div class="lbl">Dashboards</div><div class="val" style="font-size:16px">${efmt(d.dat_dash)}</div></div>
+  </div></div>`;
+}
+
+function engBuildFilter(){
+  document.getElementById('eng-pill-months').innerHTML=engAvail.map(k=>{
+    const s=ENG_SHEETS.find(x=>x.key===k);
+    return'<button class="pill'+(engSelMonth===k?' active':'')+'" onclick="engSelectMonth(\''+k+'\')">'+s.label+'</button>';
+  }).join('');
+  const wkSec=document.getElementById('eng-week-section');
+  if(engSelMonth&&engData[engSelMonth]){
+    const weeks=engData[engSelMonth].weekly;
+    if(weeks.length){wkSec.style.display='';document.getElementById('eng-pill-weeks').innerHTML=weeks.map(w=>'<button class="pill'+(engSelWeek===w.label?' active':'')+'" onclick="engSelectWeek(\''+w.label.replace(/'/g,"\\'")+'\')" >'+w.label+'</button>').join('');}
+    else wkSec.style.display='none';
+  }else wkSec.style.display='none';
+  const b=document.getElementById('eng-badge');b.style.display=engSelMonth?'inline-flex':'none';
+}
+function engSelectMonth(k){engSelMonth=engSelMonth===k?null:k;engSelWeek=null;engBuildFilter();engRender();}
+function engSelectWeek(l){engSelWeek=engSelWeek===l?null:l;engBuildFilter();engRender();}
+
+// ════════════════════════════════════════════════
+// CS — dados embutidos (planilha CS separada)
+// ════════════════════════════════════════════════
+const CS_MONTHS=[
+  {key:'nov',label:'Novembro',  sheet:'Novembro'},
+  {key:'dez',label:'Dezembro',  sheet:'Dezembro 2025'},
+  {key:'jan',label:'Janeiro',   sheet:'Janeiro 2026'},
+  {key:'fev',label:'Fevereiro', sheet:'Fevereiro 2026'},
+  {key:'mar',label:'Março',     sheet:'Março 2026'},
+  {key:'abr',label:'Abril',     sheet:'Abril 2026'},
+  {key:'mai',label:'Maio',      sheet:'Maio 2026'},
+];
+let csSelMonth='mai',csCharts={},csData={};
+
+// Baseline — média semanal fev+mar 2026
+const BL={mrrAtivo:726316,mrrChurn:10957,mrrExpandido:4792,mrrRetraido:2456,clientesAtivos:1297,cancelSolic:30,cancelRevert:11,upsell:19,downsell:7,risco:36,callConsult:13,callSuporte:3,callReversao:6,clickMassa:8,inadimplencia:4,cancelQnt:20,migAPI:4,migFidelidade:2,estorno:4};
+const INDS=[
+  {key:'mrrAtivo',name:'MRR ativo',dir:-1,money:true},{key:'mrrChurn',name:'MRR churn',dir:+1,money:true},
+  {key:'mrrExpandido',name:'MRR expandido',dir:-1,money:true},{key:'mrrRetraido',name:'MRR retraído',dir:+1,money:true},
+  {key:'clientesAtivos',name:'Clientes ativos',dir:-1},{key:'cancelSolic',name:'Cancelamento solicitado',dir:+1},
+  {key:'cancelRevert',name:'Cancelamento revertido',dir:-1},{key:'cancelQnt',name:'Qtd cancelamentos',dir:+1},
+  {key:'upsell',name:'Upsell realizado',dir:-1},{key:'downsell',name:'Downsell realizado',dir:+1},
+  {key:'risco',name:'Risco/intervenção',dir:+1},{key:'callConsult',name:'Call de consultoria',dir:-1},
+  {key:'callSuporte',name:'Call de suporte',dir:-1},{key:'callReversao',name:'Call de reversão',dir:-1},
+  {key:'clickMassa',name:'Migração Click Massa',dir:+1},{key:'inadimplencia',name:'Inadimplência',dir:+1},
+  {key:'migAPI',name:'Migração p/ API',dir:-1},{key:'migFidelidade',name:'Migração fidelidade',dir:-1},{key:'estorno',name:'Estorno',dir:+1}
+];
+
+function parseCsMonth(rows){
+  // conta semanas: colunas entre Indicador e Acumulado/última
+  let hRow=null;
+  for(const r of rows){if((r[0]||'').toLowerCase().trim()==='indicador'){hRow=r;break;}}
+  const semanas=hRow?hRow.slice(1).filter(h=>h&&!h.toLowerCase().includes('acumulado')&&!h.toLowerCase().includes('anterior')).length:1;
+
+  function ex(...kws){return extract(rows,...kws);}
+  function exSems(...kws){
+    // retorna array de valores por semana (excluindo col "semana anterior" e "acumulado")
+    if(!hRow)return[];
+    const cols=[];
+    hRow.forEach((h,i)=>{
+      if(i>0&&h&&!h.toLowerCase().includes('acumulado')&&!h.toLowerCase().includes('anterior'))cols.push(i);
+    });
+    const kw=kws[0].toLowerCase();
+    for(const r of rows){
+      if((r[0]||'').toLowerCase().includes(kw)){
+        return cols.map(i=>toNum(r[i]||''));
+      }
+    }
+    return cols.map(()=>null);
+  }
+
+  return{
+    semanas,
+    mrrAtivo:     ex('mrr ativo'),
+    mrrChurn:     ex('mrr churn'),
+    mrrExpandido: ex('mrr expandido'),
+    mrrRetraido:  ex('mrr retraído','mrr retraido'),
+    clientesAtivos:ex('clientes ativos'),
+    cancelSolic:  ex('cancelamento solicitado'),
+    cancelRevert: ex('cancelamento revertido'),
+    cancelQnt:    ex('qnt cancelamentos','qtd cancelamentos'),
+    upsell:       ex('upsell realizado'),
+    downsell:     ex('downsell realizado'),
+    risco:        ex('risco/intervenção','risco/intervencao'),
+    callConsult:  ex('call de consultoria','call realizadas'),
+    callSuporte:  ex('cal de suporte','call de suporte'),
+    callReversao: ex('call de reversão','call de reversao'),
+    clickMassa:   ex('migração click massa','migracao click massa'),
+    inadimplencia:ex('inadimplência','inadimplencia'),
+    migAPI:       ex('migração para api oficial','migracao para api oficial'),
+    migFidelidade:ex('migração para fidelidade','migracao para fidelidade'),
+    estorno:      ex('estorno'),
+    // semanal (para tabela de detalhe)
+    semsLabel:    hRow?hRow.slice(1).filter(h=>h&&!h.toLowerCase().includes('acumulado')&&!h.toLowerCase().includes('anterior')):[],
+    sems:{
+      mrrAtivo:     exSems('mrr ativo'),
+      mrrChurn:     exSems('mrr churn'),
+      mrrExpandido: exSems('mrr expandido'),
+      cancelSolic:  exSems('cancelamento solicitado'),
+      cancelRevert: exSems('cancelamento revertido'),
+      upsell:       exSems('upsell realizado'),
+      risco:        exSems('risco/intervenção'),
+    }
   };
 }
 
-function render() {
-  dch();
-  const kpis = getKPIs();
-
-  if (kpis.mode === 'compare') {
-    renderCompare(kpis.months);
-  } else {
-    renderSingle(kpis.single, kpis.label, kpis.mode === 'week');
-  }
-}
-
-function renderCompare(months) {
-  const M = months.map(m => m.label);
-  const g = k => months.map(m => m.d[k]);
-  const ev=g('eng_tarefas'), eb=g('eng_bugs'), ew=g('eng_wip'), ebk=g('eng_backlog');
-  const ii=g('inf_inc'), in8=g('inf_n8n'), in8i=g('inf_n8n_infra');
-  const dp=g('dat_plan'), de=g('dat_entr'), da=g('dat_atrs'), dpi=g('dat_pipe'), dd=g('dat_dash');
-  const last = months.length - 1;
-  const prev = last - 1;
-  const taxa = dp[last]>0 ? Math.round(de[last]/dp[last]*100) : null;
-  const lbl = months[last]?.label || '';
-
-  const COLORS = ['#B5D4F4','#9FE1CB','#FAC775','#C9B8F4','#F4B8C9'];
-  const BORDERS = ['#378ADD','#1D9E75','#EF9F27','#7C5ABF','#BF3F6B'];
-
-  document.getElementById('root').innerHTML = `
-  <div class="wrap">
-    <div class="tabs">
-      <button class="tab active all" onclick="setTab('all')">Visão geral</button>
-      <button class="tab eng" onclick="setTab('eng')">Engenharia</button>
-      <button class="tab inf" onclick="setTab('inf')">Infra</button>
-      <button class="tab dat" onclick="setTab('dat')">Dados</button>
-    </div>
-    <div class="sec visible" id="sec-all">
-      <div class="sl">Destaques — ${lbl}</div>
-      <div class="cards">
-        <div class="card"><div class="lbl">Tarefas entregues</div><div class="val">${fmt(ev[last])}</div><div class="sub">${bk(pct(ev[prev],ev[last]),'good')} vs anterior</div></div>
-        <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${fmt(eb[last])}</div><div class="sub">${bk(pct(eb[prev],eb[last]),'good')} vs anterior</div></div>
-        <div class="card"><div class="lbl">Incidentes Infra</div><div class="val">${fmt(ii[last])}</div><div class="sub">${bk(pct(ii[prev],ii[last]),'bad')} vs anterior</div></div>
-        <div class="card"><div class="lbl">Falhas n8n</div><div class="val" style="font-size:17px">${fmt(in8[last])}</div><div class="sub">${bk(pct(in8[prev],in8[last]),'bad')} vs anterior</div></div>
-        <div class="card"><div class="lbl">Demandas Dados</div><div class="val">${fmt(de[last])}/${fmt(dp[last])}</div><div class="sub">${taxa!==null?`<span class="bk am">${taxa}%</span> taxa`:''}</div></div>
-        <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:17px">${fmt(dd[last])}</div><div class="sub">${bk(pct(dd[0],dd[last]),'bad')} vs ${months[0]?.label||''}</div></div>
-      </div>
-      <div class="sl">Tarefas, bugs e incidentes</div>
-      <div class="leg">${M.map((m,i)=>`<span><span class="leg-sq" style="background:${COLORS[i%COLORS.length]}"></span>${m}</span>`).join('')}</div>
-      <div class="cw" style="height:250px"><canvas id="c-all-bar"></canvas></div>
-      <div class="sl">Falhas n8n — evolução</div>
-      <div class="cw" style="height:190px"><canvas id="c-all-n8n"></canvas></div>
-    </div>
-    <div class="sec" id="sec-eng">
-      <div class="sl" style="color:#3B6D11">Comparativo mensal</div>
-      <div class="cards">
-        <div class="card"><div class="lbl">Tarefas (${lbl})</div><div class="val">${fmt(ev[last])}</div><div class="sub">${bk(pct(ev[prev],ev[last]),'good')} vs anterior</div></div>
-        <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${fmt(eb[last])}</div><div class="sub">${bk(pct(eb[prev],eb[last]),'good')} vs anterior</div></div>
-        <div class="card"><div class="lbl">Backlog bugs</div><div class="val">${fmt(ebk[last])}</div><div class="sub" style="color:#999;font-size:11px">${months[0]?.label}: ${fmt(ebk[0])}</div></div>
-        <div class="card"><div class="lbl">WIP</div><div class="val">${fmt(ew[last])}</div><div class="sub">${bk(pct(ew[prev],ew[last]),'bad')} vs anterior</div></div>
-      </div>
-      <div class="tw"><table>
-        <thead><tr><th style="text-align:left">Indicador</th>${M.map(m=>`<th>${m}</th>`).join('')}${months.length>=2?`<th>${months[months.length-2].label}→${months[months.length-1].label}</th>`:''}</tr></thead>
-        <tbody>
-          <tr><td>Tarefas/Story entregues</td>${ev.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${bk(pct(ev[prev],ev[last]),'good')}</td></tr>
-          <tr><td>Bugs corrigidos</td>${eb.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${bk(pct(eb[prev],eb[last]),'good')}</td></tr>
-          <tr><td>Bugs em backlog</td>${ebk.map(v=>`<td>${fmt(v)}</td>`).join('')}<td><span class="bk na">sem dado</span></td></tr>
-          <tr><td>Demandas em andamento (WIP)</td>${ew.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${bk(pct(ew[prev],ew[last]),'bad')}</td></tr>
-        </tbody>
-      </table></div>
-      <div class="sl">Evolução — tarefas, bugs e WIP</div>
-      <div class="leg">
-        <span><span class="leg-sq" style="background:#639922"></span>Tarefas</span>
-        <span><span class="leg-sq" style="background:#E24B4A;border-radius:50%"></span>Bugs</span>
-        <span><span class="leg-sq" style="background:#888;border-radius:50%"></span>WIP</span>
-      </div>
-      <div class="cw" style="height:230px"><canvas id="c-eng-line"></canvas></div>
-    </div>
-    <div class="sec" id="sec-inf">
-      <div class="sl" style="color:#185FA5">Comparativo mensal</div>
-      <div class="cards">
-        <div class="card"><div class="lbl">Incidentes (${lbl})</div><div class="val">${fmt(ii[last])}</div><div class="sub">${bk(pct(ii[prev],ii[last]),'bad')} vs anterior</div></div>
-        <div class="card"><div class="lbl">Falhas n8n total</div><div class="val" style="font-size:17px">${fmt(in8[last])}</div><div class="sub">${bk(pct(in8[prev],in8[last]),'bad')} vs anterior</div></div>
-        <div class="card"><div class="lbl">Falhas n8n Infra</div><div class="val" style="font-size:17px">${fmt(in8i[last])}</div><div class="sub">${bk(pct(in8i[prev],in8i[last]),'bad')} vs anterior</div></div>
-      </div>
-      <div class="tw"><table>
-        <thead><tr><th style="text-align:left">Indicador</th>${M.map(m=>`<th>${m}</th>`).join('')}</tr></thead>
-        <tbody>
-          <tr><td>Incidentes</td>${ii.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
-          <tr><td>Falhas n8n (total)</td>${in8.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
-          <tr><td>Falhas n8n (só Infra)</td>${in8i.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
-        </tbody>
-      </table></div>
-      <div class="sl">Falhas n8n — evolução</div>
-      <div class="cw" style="height:190px"><canvas id="c-inf-n8n"></canvas></div>
-      <div class="sl">Incidentes por mês</div>
-      <div class="cw" style="height:170px"><canvas id="c-inf-inc"></canvas></div>
-    </div>
-    <div class="sec" id="sec-dat">
-      <div class="sl" style="color:#854F0B">Comparativo mensal</div>
-      <div class="cards">
-        <div class="card"><div class="lbl">Entregues/Planejadas</div><div class="val">${fmt(de[last])}/${fmt(dp[last])}</div><div class="sub">${taxa!==null?`<span class="bk am">${taxa}%</span> taxa`:''}</div></div>
-        <div class="card"><div class="lbl">Atrasadas</div><div class="val">${fmt(da[last])}</div><div class="sub">${bk(pct(da[prev],da[last]),'bad')} vs anterior</div></div>
-        <div class="card"><div class="lbl">Falhas pipeline</div><div class="val">${fmt(dpi[last])}</div><div class="sub" style="color:#999;font-size:11px">${months[0]?.label}: ${fmt(dpi[0])}</div></div>
-        <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:17px">${fmt(dd[last])}</div><div class="sub">${bk(pct(dd[0],dd[last]),'bad')} vs ${months[0]?.label}</div></div>
-      </div>
-      <div class="tw"><table>
-        <thead><tr><th style="text-align:left">Indicador</th>${M.map(m=>`<th>${m}</th>`).join('')}</tr></thead>
-        <tbody>
-          <tr><td>Demandas planejadas</td>${dp.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
-          <tr><td>Demandas entregues</td>${de.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
-          <tr><td>Demandas atrasadas</td>${da.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
-          <tr><td>Falhas na pipeline</td>${dpi.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
-          <tr><td>Falhas em dashboards</td>${dd.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
-        </tbody>
-      </table></div>
-      <div class="sl">Planejadas vs entregues</div>
-      <div class="leg"><span><span class="leg-sq" style="background:#FAC775"></span>Planejadas</span><span><span class="leg-sq" style="background:#9FE1CB"></span>Entregues</span></div>
-      <div class="cw" style="height:195px"><canvas id="c-dat-bar"></canvas></div>
-    </div>
-  </div>`;
-
-  const ln = (color,bg) => ({borderColor:color,backgroundColor:bg,borderWidth:2,pointRadius:5,pointBackgroundColor:color,fill:true,tension:0.3});
-  mkBar('c-all-bar',['Tarefas','Bugs','Incidentes'],
-    months.map((m,i)=>({label:m.label,data:[m.d.eng_tarefas,m.d.eng_bugs,m.d.inf_inc],backgroundColor:COLORS[i%COLORS.length],borderColor:BORDERS[i%BORDERS.length],borderWidth:1,borderRadius:4}))
-  );
-  mkLine('c-all-n8n', M, [{label:'n8n',data:in8,...ln('#E24B4A','rgba(226,75,74,.07)')}]);
-  mkLine('c-eng-line', M, [
-    {label:'Tarefas',data:ev,...ln('#639922','rgba(99,153,34,.07)')},
-    {label:'Bugs',data:eb,borderColor:'#E24B4A',borderWidth:2,pointRadius:5,pointBackgroundColor:'#E24B4A',pointStyle:'triangle',fill:false,tension:0.3},
-    {label:'WIP',data:ew,borderColor:'#888',borderDash:[5,4],borderWidth:1.5,pointRadius:4,pointBackgroundColor:'#888',fill:false,tension:0.3},
-  ]);
-  mkLine('c-inf-n8n', M, [{label:'n8n',data:in8,...ln('#E24B4A','rgba(226,75,74,.07)')}]);
-  mkBar('c-inf-inc', M, [{label:'Inc',data:ii,backgroundColor:COLORS.slice(0,M.length),borderColor:BORDERS.slice(0,M.length),borderWidth:1,borderRadius:4}]);
-  mkBar('c-dat-bar', M, [
-    {label:'Plan',data:dp,backgroundColor:'#FAC775',borderColor:'#EF9F27',borderWidth:1,borderRadius:4},
-    {label:'Entr',data:de,backgroundColor:'#9FE1CB',borderColor:'#1D9E75',borderWidth:1,borderRadius:4},
-  ]);
-}
-
-function renderSingle(d, label, isWeek) {
-  const taxa = d.dat_plan>0 ? Math.round(d.dat_entr/d.dat_plan*100) : null;
-  document.getElementById('root').innerHTML = `
-  <div class="wrap">
-    <div class="ctx-bar">📅 <span>${label}</span>${isWeek?' · visão semanal':' · visão mensal'}</div>
-    <div class="tabs">
-      <button class="tab active all" onclick="setTab('all')">Visão geral</button>
-      <button class="tab eng" onclick="setTab('eng')">Engenharia</button>
-      <button class="tab inf" onclick="setTab('inf')">Infra</button>
-      <button class="tab dat" onclick="setTab('dat')">Dados</button>
-    </div>
-    <div class="sec visible" id="sec-all">
-      <div class="sl">Resumo — ${label}</div>
-      <div class="cards">
-        <div class="card"><div class="lbl">Tarefas entregues</div><div class="val">${fmt(d.eng_tarefas)}</div></div>
-        <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${fmt(d.eng_bugs)}</div></div>
-        <div class="card"><div class="lbl">Incidentes Infra</div><div class="val">${fmt(d.inf_inc)}</div></div>
-        <div class="card"><div class="lbl">Falhas n8n</div><div class="val" style="font-size:17px">${fmt(d.inf_n8n)}</div></div>
-        <div class="card"><div class="lbl">Demandas Dados</div><div class="val">${fmt(d.dat_entr)}/${fmt(d.dat_plan)}</div><div class="sub">${taxa!==null?`<span class="bk am">${taxa}%</span> taxa`:''}</div></div>
-        <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:17px">${fmt(d.dat_dash)}</div></div>
-      </div>
-    </div>
-    <div class="sec" id="sec-eng">
-      <div class="sl" style="color:#3B6D11">Engenharia</div>
-      <div class="cards">
-        <div class="card"><div class="lbl">Tarefas entregues</div><div class="val">${fmt(d.eng_tarefas)}</div></div>
-        <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${fmt(d.eng_bugs)}</div></div>
-        <div class="card"><div class="lbl">Bugs em backlog</div><div class="val">${fmt(d.eng_backlog)}</div></div>
-        <div class="card"><div class="lbl">WIP</div><div class="val">${fmt(d.eng_wip)}</div></div>
-      </div>
-    </div>
-    <div class="sec" id="sec-inf">
-      <div class="sl" style="color:#185FA5">Infra</div>
-      <div class="cards">
-        <div class="card"><div class="lbl">Incidentes</div><div class="val">${fmt(d.inf_inc)}</div></div>
-        <div class="card"><div class="lbl">Falhas n8n total</div><div class="val" style="font-size:17px">${fmt(d.inf_n8n)}</div></div>
-        <div class="card"><div class="lbl">Falhas n8n Infra</div><div class="val" style="font-size:17px">${fmt(d.inf_n8n_infra)}</div></div>
-        <div class="card"><div class="lbl">Demandas N3</div><div class="val">${fmt(d.inf_n3)}</div></div>
-      </div>
-    </div>
-    <div class="sec" id="sec-dat">
-      <div class="sl" style="color:#854F0B">Dados</div>
-      <div class="cards">
-        <div class="card"><div class="lbl">Planejadas</div><div class="val">${fmt(d.dat_plan)}</div></div>
-        <div class="card"><div class="lbl">Entregues</div><div class="val">${fmt(d.dat_entr)}</div></div>
-        <div class="card"><div class="lbl">Atrasadas</div><div class="val">${fmt(d.dat_atrs)}</div></div>
-        <div class="card"><div class="lbl">Falhas pipeline</div><div class="val">${fmt(d.dat_pipe)}</div></div>
-        <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:17px">${fmt(d.dat_dash)}</div></div>
-      </div>
-    </div>
-  </div>`;
-}
-
-// ── Filtro ────────────────────────────────────────────────────────────────────
-function buildFilterUI() {
-  const { availableSheets, allData, selMonth, selWeek } = state;
-  const pmEl = document.getElementById('pillMonths');
-  const pwEl = document.getElementById('pillWeeks');
-  const wkSec = document.getElementById('weekSection');
-
-  pmEl.innerHTML = availableSheets.map(k => {
-    const s = KNOWN_SHEETS.find(x => x.key === k);
-    const lbl = s?.label || k;
-    return `<button class="pill${selMonth===k?' active':''}" onclick="selectMonth('${k}')">${lbl}</button>`;
-  }).join('');
-
-  if (selMonth) {
-    const weeks = allData[selMonth]?.weekly || [];
-    if (weeks.length > 0) {
-      wkSec.style.display = '';
-      pwEl.innerHTML = weeks.map(w =>
-        `<button class="pill${selWeek===w.label?' active':''}" onclick="selectWeek('${w.label}')">${w.label}</button>`
-      ).join('');
-    } else {
-      wkSec.style.display = 'none';
-    }
-  } else {
-    wkSec.style.display = 'none';
-  }
-
-  // badge
-  const active = selMonth ? 1 : 0;
-  const badge = document.getElementById('filterBadge');
-  badge.style.display = active ? 'inline-flex' : 'none';
-  badge.textContent = active;
-}
-
-function selectMonth(key) {
-  if (state.selMonth === key) {
-    state.selMonth = null; state.selWeek = null;
-  } else {
-    state.selMonth = key; state.selWeek = null;
-  }
-  buildFilterUI();
-  render();
-}
-
-function selectWeek(label) {
-  state.selWeek = state.selWeek === label ? null : label;
-  buildFilterUI();
-  render();
-}
-
-function toggleFilter() {
-  document.getElementById('modalBg').classList.toggle('open');
-  buildFilterUI();
-}
-function closeFilter() { document.getElementById('modalBg').classList.remove('open'); }
-function handleBgClick(e) { if (e.target === document.getElementById('modalBg')) closeFilter(); }
-
-function setTab(t) {
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.sec').forEach(s => s.classList.remove('visible'));
-  document.querySelector('.tab.' + t).classList.add('active');
-  document.getElementById('sec-' + t).classList.add('visible');
-}
-
-// ── Load ──────────────────────────────────────────────────────────────────────
-async function loadData() {
-  const btn = document.getElementById('btnRefresh');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin">↻</span> Buscando…';
-
-  try {
-    // tenta buscar todas as abas conhecidas; ignora as que não existem (404)
-    const results = await Promise.allSettled(
-      KNOWN_SHEETS.map(s => fetchSheet(s.sheet).then(rows => ({ key: s.key, rows })))
-    );
-
-    state.allData = {};
-    state.availableSheets = [];
-
-    for (const r of results) {
-      if (r.status === 'fulfilled') {
-        const { key, rows } = r.value;
-        state.allData[key] = {
-          monthly: parseMonthly(rows),
-          weekly:  parseWeekly(rows),
-        };
-        state.availableSheets.push(key);
+async function csLoad(){
+  const btn=document.getElementById('cs-refresh');
+  btn.disabled=true;btn.innerHTML='<span class="spin">↻</span> Buscando…';
+  try{
+    const results=await Promise.allSettled(CS_MONTHS.map(s=>fetchCSSheet(s.sheet).then(rows=>({key:s.key,rows}))));
+    csData={};
+    for(const r of results){
+      if(r.status==='fulfilled'){
+        const{key,rows}=r.value;
+        csData[key]=parseCsMonth(rows);
       }
     }
-
-    // se mês selecionado sumiu, reseta
-    if (state.selMonth && !state.availableSheets.includes(state.selMonth)) {
-      state.selMonth = null; state.selWeek = null;
-    }
-
-    render();
-    document.getElementById('upd').textContent = 'Atualizado ' +
-      new Date().toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
-  } catch(e) {
-    document.getElementById('root').innerHTML =
-      `<div class="wrap"><div class="err">⚠️ Erro: <b>${e.message}</b></div></div>`;
+    csRender();
+    document.getElementById('cs-upd').textContent='Atualizado '+new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    document.getElementById('cs-summary').innerHTML='<div class="err" style="grid-column:1/-1">⚠️ Erro ao buscar dados: <b>'+e.message+'</b><br>Verifique se a planilha está pública.</div>';
   }
-
-  btn.disabled = false;
-  btn.innerHTML = '↻ Atualizar';
+  btn.disabled=false;btn.innerHTML='↻ Atualizar';
 }
 
-loadData();
+function csFmt(v){return v==null?'—':'R$ '+Math.round(v).toLocaleString('pt-BR');}
+function csFmtN(v,d){d=d==null?1:d;return v==null?'—':parseFloat((+v).toFixed(d)).toLocaleString('pt-BR');}
+function csPct(p,b){return(b&&b!==0)?((p-b)/Math.abs(b)*100):null;}
+function csSev(p,dir){if(p==null)return'neutral';const bad=dir===+1?p>0:p<0;const abs=Math.abs(p);if(!bad)return'ok';if(abs>=20)return'bad';if(abs>=5)return'warn';return'neutral';}
+
+function csBuildFilter(){
+  document.getElementById('cs-pill-months').innerHTML=CS_MONTHS.map(m=>'<button class="pill'+(csSelMonth===m.key?' active':'')+'" onclick="csSelectMonth(\''+m.key+'\')">'+m.label+'</button>').join('');
+}
+function csSelectMonth(k){csSelMonth=k;csBuildFilter();csRender();}
+
+function csRender(){
+  if(!csData[csSelMonth]){
+    document.getElementById('cs-summary').innerHTML='<div style="color:#999;font-size:13px;grid-column:1/-1;padding:8px">Carregando dados…</div>';
+    return;
+  }
+  const M=csData[csSelMonth];
+  const blMes={};Object.keys(BL).forEach(k=>{blMes[k]=BL[k]*(M.semanas||1);});
+  document.getElementById('cs-sub-label').textContent='vs. baseline (fev+mar 2026) — '+M.label;
+  const rows=INDS.map(ind=>{const bl=blMes[ind.key];const per=M[ind.key];const p=(bl&&per!=null)?csPct(per,bl):null;return Object.assign({},ind,{bl,per,p,sev:csSev(p,ind.dir)});});
+  const alerts=rows.filter(r=>r.sev==='bad').length,warns=rows.filter(r=>r.sev==='warn').length,ok=rows.filter(r=>r.sev==='ok'||r.sev==='neutral').length;
+  document.getElementById('cs-summary').innerHTML=
+    '<div class="sc"><div class="sc-lbl">Indicadores</div><div class="sc-val">'+rows.length+'</div><div class="sc-desc">comparação mensal</div></div>'+
+    '<div class="sc"><div class="sc-lbl">Desvios negativos</div><div class="sc-val" style="color:#E24B4A">'+alerts+'</div><div class="sc-desc">desvio ≥ 20%</div></div>'+
+    '<div class="sc"><div class="sc-lbl">Em atenção</div><div class="sc-val" style="color:#EF9F27">'+warns+'</div><div class="sc-desc">desvio 5–20%</div></div>'+
+    '<div class="sc"><div class="sc-lbl">Estáveis</div><div class="sc-val" style="color:#3B6D11">'+ok+'</div><div class="sc-desc">dentro do esperado</div></div>';
+  const hi=rows.filter(r=>r.sev==='bad'||r.sev==='warn').sort((a,b)=>Math.abs(b.p)-Math.abs(a.p));
+  document.getElementById('cs-desvios').innerHTML=hi.map(r=>{const sign=r.p>0?'+':'';const fv=v=>r.money?csFmt(v):csFmtN(v,1);return'<div class="dc '+r.sev+'"><div class="dc-name">'+r.name+'</div><div class="dc-vals">ant. '+fv(r.bl)+' → atual '+fv(r.per)+'</div><div class="dc-badge '+r.sev+'">'+sign+csFmtN(r.p,1)+'%</div></div>';}).join('')||'<div style="color:#999;font-size:13px;padding:8px">Nenhum desvio significativo.</div>';
+  const sorted=rows.slice().sort((a,b)=>(a.p||0)-(b.p||0));
+  const clrs=sorted.map(r=>r.sev==='bad'?'#E24B4A':r.sev==='warn'?'#EF9F27':r.sev==='ok'?'#4CAF50':'#B4B2A9');
+  document.getElementById('cs-chart-title').textContent='Todos os desvios — '+M.label+' vs. baseline';
+  if(csCharts.desvios)csCharts.desvios.destroy();
+  csCharts.desvios=new Chart(document.getElementById('cs-chart-desvios'),{type:'bar',data:{labels:sorted.map(r=>r.name),datasets:[{data:sorted.map(r=>r.p||0),backgroundColor:clrs,borderRadius:4,barThickness:16}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.raw>0?'+':'')+ctx.raw.toFixed(1)+'%'}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#9ca3af',font:{size:10},callback:v=>v+'%'}},y:{grid:{display:false},ticks:{color:'#555',font:{size:10}}}}}});
+  const mAtv=['Fev/26','Mar/26','Abr/26','Mai/26'];
+  if(csCharts.atv)csCharts.atv.destroy();
+  csCharts.atv=new Chart(document.getElementById('cs-chart-atv'),{type:'line',data:{labels:mAtv,datasets:[{label:'Consultoria',data:[51,62,12,10],borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#185FA5'},{label:'Suporte',data:[7,20,13,18],borderColor:'#EF9F27',backgroundColor:'rgba(239,159,39,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#EF9F27'},{label:'Reversão',data:[17,31,22,7],borderColor:'#E24B4A',backgroundColor:'rgba(226,75,74,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#E24B4A'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#9ca3af',font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#9ca3af',font:{size:10}},beginAtZero:true}}}});
+  if(csCharts.exp)csCharts.exp.destroy();
+  csCharts.exp=new Chart(document.getElementById('cs-chart-exp'),{type:'line',data:{labels:mAtv,datasets:[{label:'Churn',data:[53036,39242,56858,25502],borderColor:'#E24B4A',backgroundColor:'rgba(226,75,74,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#E24B4A'},{label:'Expandido',data:[8875,26243,8701,4558],borderColor:'#3B6D11',backgroundColor:'rgba(59,109,17,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#3B6D11'},{label:'Retraído',data:[6759,13746,10035,5278],borderColor:'#EF9F27',backgroundColor:'rgba(239,159,39,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#EF9F27'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#666',font:{size:10},boxWidth:8,boxHeight:8}}},scales:{x:{grid:{display:false},ticks:{color:'#9ca3af',font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#9ca3af',font:{size:10},callback:v=>'R$'+Math.round(v/1000)+'k'},beginAtZero:true}}}});
+  const trends=rows.filter(r=>r.sev==='warn');
+  document.getElementById('cs-trend').innerHTML=trends.map(r=>{const sign=r.p>0?'+':'';return'<div class="tc"><div class="ti-box">▲</div><div><div class="ti-name">'+r.name+'</div><div class="ti-dev">'+sign+csFmtN(r.p,1)+'%</div></div></div>';}).join('')||'<div style="color:#999;font-size:13px;padding:8px">Nenhum.</div>';
+  document.getElementById('cs-table-title').textContent='Detalhe por semana — '+M.label;
+  const keysT=['mrrAtivo','mrrChurn','mrrExpandido','cancelSolic','cancelRevert','upsell','risco'];
+  const names={mrrAtivo:'MRR Ativo',mrrChurn:'MRR Churn',mrrExpandido:'MRR Expandido',cancelSolic:'Cancel. Solicitado',cancelRevert:'Cancel. Revertido',upsell:'Upsell',risco:'Risco/Interv.'};
+  const moneyK={mrrAtivo:1,mrrChurn:1,mrrExpandido:1};
+  const dirMap={mrrAtivo:-1,mrrChurn:+1,mrrExpandido:-1,cancelSolic:+1,cancelRevert:-1,upsell:-1,risco:+1};
+  const pillLbl={bad:'Alerta',warn:'Atenção',ok:'Melhora',neutral:'Estável'};
+  document.getElementById('cs-thead').innerHTML='<tr><th>Indicador</th>'+M.semsLabel.map(s=>'<th>'+s+'</th>').join('')+'<th>Total</th><th>Baseline</th><th>Δ</th><th>Status</th></tr>';
+  document.getElementById('cs-tbody').innerHTML=keysT.map(k=>{
+    const bl=blMes[k],total=M[k];const p=csPct(total,bl),sev=csSev(p,dirMap[k]);
+    const sign=p!=null&&p>0?'+':'';const fv=v=>moneyK[k]?csFmt(v):csFmtN(v,0);
+    const semCells=(M.sems[k]||[]).map(v=>'<td style="font-family:monospace;font-size:11px">'+fv(v)+'</td>').join('');
+    return'<tr><td style="font-weight:500">'+names[k]+'</td>'+semCells+'<td style="font-family:monospace;font-size:11px;font-weight:500">'+fv(total)+'</td><td style="font-family:monospace;font-size:11px;color:#888">'+fv(bl)+'</td><td><span class="pill '+sev+'">'+(p!=null?sign+csFmtN(p,1)+'%':'—')+'</span></td><td><span class="pill '+sev+'">'+pillLbl[sev]+'</span></td></tr>';
+  }).join('');
+  document.getElementById('cs-upd').textContent='Atualizado '+new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+
+// ════ INIT ════
+engLoad();
+csLoad();
+csBuildFilter();
 </script>
 </body>
 </html>
