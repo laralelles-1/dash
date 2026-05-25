@@ -10,15 +10,30 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:14px}
 .hdr{background:#fff;border-bottom:.5px solid #e0ddd5;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:8px;flex-wrap:wrap}
 .hdr h1{font-size:15px;font-weight:500}
-.hr{display:flex;align-items:center;gap:10px}
+.hr{display:flex;align-items:center;gap:8px}
 .upd{font-size:11px;color:#999}
-.btn{font-size:12px;padding:5px 13px;border:.5px solid #d0cdc5;border-radius:8px;background:#fff;cursor:pointer;color:#444;transition:all .15s}
+.btn{font-size:12px;padding:5px 11px;border:.5px solid #d0cdc5;border-radius:8px;background:#fff;cursor:pointer;color:#444;transition:all .15s;display:flex;align-items:center;gap:5px}
 .btn:hover{background:#f0efe8}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .spin{display:inline-block;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* filtro modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:200;align-items:flex-start;justify-content:flex-end}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border:.5px solid #e0ddd5;border-radius:12px;padding:20px;margin:56px 16px 0 0;width:300px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.modal h2{font-size:13px;font-weight:500;margin-bottom:14px;color:#1a1a1a}
+.modal-section{margin-bottom:16px}
+.modal-section label{font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px}
+.pill-group{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12px;padding:4px 11px;border-radius:20px;border:.5px solid #d0cdc5;background:#fff;cursor:pointer;color:#555;transition:all .15s}
+.pill:hover{background:#f0efe8}
+.pill.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.modal-close{width:100%;margin-top:4px;padding:7px;border-radius:8px;border:.5px solid #d0cdc5;background:#f5f5f0;cursor:pointer;font-size:12px;color:#555}
+.modal-close:hover{background:#e8e7e0}
+.filter-badge{background:#1a1a1a;color:#fff;border-radius:50%;font-size:10px;font-weight:600;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;margin-left:2px}
+
 .wrap{padding:18px 20px;max-width:1100px;margin:0 auto}
-.note{background:#fff;border:.5px solid #e0ddd5;border-radius:8px;padding:9px 13px;font-size:11.5px;color:#666;margin-bottom:18px;display:flex;gap:7px}
 .tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
 .tab{font-size:12px;font-weight:500;padding:5px 13px;border-radius:8px;border:.5px solid #d0cdc5;background:#fff;color:#666;cursor:pointer;transition:all .15s}
 .tab.active.all{background:#f0efe8;color:#1a1a1a;border-color:#bbb}
@@ -51,29 +66,79 @@ tbody tr:hover td{background:#fafaf7}
 .leg span{display:flex;align-items:center;gap:4px}
 .leg-sq{width:9px;height:9px;border-radius:2px;flex-shrink:0}
 .err{background:#FCEBEB;color:#A32D2D;padding:16px;border-radius:10px;font-size:13px;margin:20px 0;line-height:1.6}
+.ctx-bar{background:#fff;border:.5px solid #e0ddd5;border-radius:8px;padding:8px 13px;font-size:12px;color:#555;margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.ctx-bar span{font-weight:500;color:#1a1a1a}
 </style>
 </head>
 <body>
+
+<!-- HEADER -->
 <div class="hdr">
   <h1>📊 Engenharia, Infra e Dados</h1>
   <div class="hr">
     <span class="upd" id="upd">—</span>
+    <button class="btn" onclick="toggleFilter()" id="btnFilter">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="10.5" r=".75" fill="currentColor" stroke="none"/></svg>
+      Período <span id="filterBadge" style="display:none" class="filter-badge">1</span>
+    </button>
     <button class="btn" id="btnRefresh" onclick="loadData()">↻ Atualizar</button>
   </div>
 </div>
-<div id="root"><div style="text-align:center;padding:60px;color:#999;font-size:13px">Carregando dados da planilha…</div></div>
+
+<!-- MODAL FILTRO -->
+<div class="modal-bg" id="modalBg" onclick="handleBgClick(event)">
+  <div class="modal">
+    <h2>Filtrar período</h2>
+    <div class="modal-section">
+      <label>Mês</label>
+      <div class="pill-group" id="pillMonths"></div>
+    </div>
+    <div class="modal-section" id="weekSection" style="display:none">
+      <label>Semana</label>
+      <div class="pill-group" id="pillWeeks"></div>
+    </div>
+    <button class="modal-close" onclick="closeFilter()">Fechar</button>
+  </div>
+</div>
+
+<div id="root"><div style="text-align:center;padding:60px;color:#999;font-size:13px">Carregando dados…</div></div>
 
 <script>
 const SHEET_ID = '1f6QhW9hMR7EBq5KrgKhFxVEHvyvjxbcshcevSYJkVi8';
 
-// ── Busca aba via export CSV (funciona com planilha pública, HTTPS, sem CORS) ─
+// ── Nomes das abas conhecidos — adicione novas abas aqui ─────────────────────
+// O sistema tentará buscar automaticamente qualquer aba listada.
+// Para adicionar um novo mês, basta adicionar ao array abaixo.
+const KNOWN_SHEETS = [
+  { key:'nov',  label:'Novembro',   sheet:'Novembro'   },
+  { key:'dez',  label:'Dezembro',   sheet:'Dezembro'   },
+  { key:'jan',  label:'Janeiro',    sheet:'Jan/2026'   },
+  { key:'fev',  label:'Fevereiro',  sheet:'Fev/2026'   },
+  { key:'mar',  label:'Março',      sheet:'Mar/2026'   },
+  { key:'abr',  label:'Abril',      sheet:'Abril/2026' },
+  { key:'mai',  label:'Maio',       sheet:'Maio/2026'  },
+  // { key:'jun', label:'Junho', sheet:'Jun/2026' }, // ← descomente quando criar a aba
+];
+
+// Estado do filtro
+let state = {
+  allData: {},        // key → { monthly, weekly }
+  availableSheets: [],// abas que existem na planilha
+  selMonth: null,     // chave do mês selecionado
+  selWeek: null,      // label da semana selecionada (ou null = mensal)
+};
+
+// ── Fetch CSV ─────────────────────────────────────────────────────────────────
 async function fetchSheet(sheetName) {
   const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
     '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(sheetName);
   const res = await fetch(url);
-  if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + sheetName);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   const text = await res.text();
-  // parse CSV respeitando aspas
+  return parseCSV(text);
+}
+
+function parseCSV(text) {
   return text.trim().split('\n').map(line => {
     const cols = []; let cur = ''; let inQ = false;
     for (let i = 0; i < line.length; i++) {
@@ -87,26 +152,54 @@ async function fetchSheet(sheetName) {
   });
 }
 
-// ── Extrai acumulado mensal de uma lista de linhas ───────────────────────────
-// Procura linha com label parecido, pega última coluna "Acumulado mensal"
-// A planilha tem col "Acumulado mensal" como última coluna com header.
-// Strategy: pega o valor da última célula não-vazia da linha.
+// ── Extrai valor: pega última célula não vazia da linha ───────────────────────
 function extract(rows, ...keywords) {
   const kws = keywords.map(k => k.toLowerCase());
   for (const r of rows) {
     const lbl = (r[0] || '').toLowerCase().trim();
     if (!lbl) continue;
-    const match = kws.some(k => lbl.includes(k));
-    if (!match) continue;
-    // pega última célula não vazia, não traço
+    if (!kws.some(k => lbl.includes(k))) continue;
     for (let i = r.length - 1; i >= 1; i--) {
       const v = (r[i] || '').trim();
-      if (v && v !== '-' && v !== '\\-' && v !== '—' && !v.startsWith('#')) {
-        return toNum(v);
-      }
+      if (v && v !== '-' && v !== '\\-' && v !== '—' && !v.startsWith('#')) return toNum(v);
     }
   }
   return null;
+}
+
+// Extrai valor de uma coluna específica (para semanas)
+function extractCol(rows, keyword, colIdx) {
+  const kw = keyword.toLowerCase();
+  for (const r of rows) {
+    const lbl = (r[0] || '').toLowerCase().trim();
+    if (lbl.includes(kw) && r[colIdx] !== undefined) {
+      const v = (r[colIdx] || '').trim();
+      if (v && v !== '-' && v !== '\\-' && v !== '—' && !v.startsWith('#')) return toNum(v);
+    }
+  }
+  return null;
+}
+
+// Detecta cabeçalhos de semana de uma aba (linha que começa com "Indicador")
+function detectWeeks(rows) {
+  for (const r of rows) {
+    if ((r[0] || '').toLowerCase().trim() === 'indicador') {
+      return r.slice(1).filter(h => h && h.toLowerCase().includes('semana'));
+    }
+  }
+  return [];
+}
+
+// Índices das colunas de semana
+function weekColIndices(rows) {
+  for (const r of rows) {
+    if ((r[0] || '').toLowerCase().trim() === 'indicador') {
+      const res = [];
+      r.forEach((h, i) => { if (i > 0 && h && h.toLowerCase().includes('semana')) res.push(i); });
+      return { headers: r.slice(1).filter(h => h && h.toLowerCase().includes('semana')), indices: res };
+    }
+  }
+  return { headers: [], indices: [] };
 }
 
 function toNum(v) {
@@ -135,15 +228,15 @@ function bk(v, dir) {
   return `<span class="bk ${cls}">${pos ? '+' : ''}${v}%</span>`;
 }
 
-// ── Parse cada aba em KPIs ────────────────────────────────────────────────────
-function parseMonth(rows) {
+// ── Parse mensal ──────────────────────────────────────────────────────────────
+function parseMonthly(rows) {
   return {
     eng_tarefas:   extract(rows, 'tarefas/story entregues', 'tarefas/story'),
     eng_bugs:      extract(rows, 'bugs corrigidos'),
     eng_backlog:   extract(rows, 'bugs em backlog'),
     eng_wip:       extract(rows, 'em andamento', 'demandas em andamento'),
-    inf_inc:       extract(rows, 'incidentes (infra', 'incidentes no mês'),
-    inf_n8n:       extract(rows, 'falhas nos workflows do n8n', 'falhas em workflows do n8n por infra (crashes)', 'falhas nos workflows'),
+    inf_inc:       extract(rows, 'incidentes (infra', 'incidentes no mês', 'incidentes críticos'),
+    inf_n8n:       extract(rows, 'falhas nos workflows do n8n', 'falhas em workflows do n8n por infra (crashes)'),
     inf_n8n_infra: extract(rows, 'falhas em workflows do n8n por infra (crashes)'),
     inf_n3:        extract(rows, 'demandas n3'),
     inf_msg:       extract(rows, 'mensagens trocadas'),
@@ -159,7 +252,30 @@ function parseMonth(rows) {
   };
 }
 
-// ── Gráficos ─────────────────────────────────────────────────────────────────
+// ── Parse semanal ─────────────────────────────────────────────────────────────
+function parseWeekly(rows) {
+  const { headers, indices } = weekColIndices(rows);
+  return headers.map((h, i) => ({
+    label: h,
+    data: {
+      eng_tarefas:   extractCol(rows, 'tarefas/story entregues', indices[i]),
+      eng_bugs:      extractCol(rows, 'bugs corrigidos', indices[i]),
+      eng_backlog:   extractCol(rows, 'bugs em backlog', indices[i]),
+      eng_wip:       extractCol(rows, 'em andamento', indices[i]),
+      inf_inc:       extractCol(rows, 'incidentes', indices[i]),
+      inf_n8n:       extractCol(rows, 'falhas nos workflows', indices[i]),
+      inf_n8n_infra: extractCol(rows, 'falhas em workflows do n8n por infra', indices[i]),
+      inf_n3:        extractCol(rows, 'demandas n3', indices[i]),
+      dat_plan:      extractCol(rows, 'demandas planejadas', indices[i]),
+      dat_entr:      extractCol(rows, 'demandas entregues', indices[i]),
+      dat_atrs:      extractCol(rows, 'demandas atrasadas', indices[i]),
+      dat_pipe:      extractCol(rows, 'falhas na execução da pipeline', indices[i]),
+      dat_dash:      extractCol(rows, 'falhas em dashboards', indices[i]),
+    }
+  }));
+}
+
+// ── Gráficos ──────────────────────────────────────────────────────────────────
 let charts = {};
 function dch() { Object.values(charts).forEach(c => c.destroy()); charts = {}; }
 
@@ -179,71 +295,91 @@ function mkLine(id, labels, datasets) {
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
-function render(mar, abr, mai) {
+function getKPIs() {
+  const { allData, availableSheets, selMonth, selWeek } = state;
+  if (selMonth && selWeek) {
+    // visão semanal de um mês
+    const weeks = allData[selMonth]?.weekly || [];
+    const wk = weeks.find(w => w.label === selWeek);
+    return { mode:'week', label: selMonth + ' · ' + selWeek, single: wk?.data || {} };
+  }
+  if (selMonth) {
+    // visão mensal de um mês específico
+    return { mode:'single', label: KNOWN_SHEETS.find(s=>s.key===selMonth)?.label || selMonth,
+             single: allData[selMonth]?.monthly || {} };
+  }
+  // visão comparativa padrão (últimos 3 meses disponíveis)
+  const last3 = availableSheets.slice(-3);
+  return {
+    mode: 'compare',
+    months: last3.map(k => ({ key:k, label: KNOWN_SHEETS.find(s=>s.key===k)?.label || k, d: allData[k]?.monthly || {} }))
+  };
+}
+
+function render() {
   dch();
-  const M = ['Março','Abril','Maio (parc.)'];
-  const ev  = [mar.eng_tarefas, abr.eng_tarefas, mai.eng_tarefas];
-  const eb  = [mar.eng_bugs,    abr.eng_bugs,    mai.eng_bugs];
-  const ew  = [mar.eng_wip,     abr.eng_wip,     mai.eng_wip];
-  const ebk = [mar.eng_backlog, abr.eng_backlog,  mai.eng_backlog];
-  const ii  = [mar.inf_inc,     abr.inf_inc,     mai.inf_inc];
-  const in8 = [mar.inf_n8n,     abr.inf_n8n,     mai.inf_n8n];
-  const in8i= [mar.inf_n8n_infra, abr.inf_n8n_infra, mai.inf_n8n_infra];
-  const dp  = [mar.dat_plan,    abr.dat_plan,    mai.dat_plan];
-  const de  = [mar.dat_entr,    abr.dat_entr,    mai.dat_entr];
-  const da  = [mar.dat_atrs,    abr.dat_atrs,    mai.dat_atrs];
-  const dpi = [mar.dat_pipe,    abr.dat_pipe,    mai.dat_pipe];
-  const dd  = [mar.dat_dash,    abr.dat_dash,    mai.dat_dash];
-  const taxa = dp[2] > 0 ? Math.round(de[2]/dp[2]*100) : null;
+  const kpis = getKPIs();
+
+  if (kpis.mode === 'compare') {
+    renderCompare(kpis.months);
+  } else {
+    renderSingle(kpis.single, kpis.label, kpis.mode === 'week');
+  }
+}
+
+function renderCompare(months) {
+  const M = months.map(m => m.label);
+  const g = k => months.map(m => m.d[k]);
+  const ev=g('eng_tarefas'), eb=g('eng_bugs'), ew=g('eng_wip'), ebk=g('eng_backlog');
+  const ii=g('inf_inc'), in8=g('inf_n8n'), in8i=g('inf_n8n_infra');
+  const dp=g('dat_plan'), de=g('dat_entr'), da=g('dat_atrs'), dpi=g('dat_pipe'), dd=g('dat_dash');
+  const last = months.length - 1;
+  const prev = last - 1;
+  const taxa = dp[last]>0 ? Math.round(de[last]/dp[last]*100) : null;
+  const lbl = months[last]?.label || '';
+
+  const COLORS = ['#B5D4F4','#9FE1CB','#FAC775','#C9B8F4','#F4B8C9'];
+  const BORDERS = ['#378ADD','#1D9E75','#EF9F27','#7C5ABF','#BF3F6B'];
 
   document.getElementById('root').innerHTML = `
   <div class="wrap">
-    <div class="note">ℹ️ Maio parcial = 3 semanas (26/abr–16/mai). "—" = não reportado.</div>
     <div class="tabs">
       <button class="tab active all" onclick="setTab('all')">Visão geral</button>
       <button class="tab eng" onclick="setTab('eng')">Engenharia</button>
       <button class="tab inf" onclick="setTab('inf')">Infra</button>
       <button class="tab dat" onclick="setTab('dat')">Dados</button>
     </div>
-
-    <!-- GERAL -->
     <div class="sec visible" id="sec-all">
-      <div class="sl">Destaques — maio (parcial)</div>
+      <div class="sl">Destaques — ${lbl}</div>
       <div class="cards">
-        <div class="card"><div class="lbl">Tarefas entregues</div><div class="val">${fmt(ev[2])}</div><div class="sub">${bk(pct(ev[1],ev[2]),'good')} vs abr</div></div>
-        <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${fmt(eb[2])}</div><div class="sub">${bk(pct(eb[1],eb[2]),'good')} vs abr</div></div>
-        <div class="card"><div class="lbl">Incidentes Infra</div><div class="val">${fmt(ii[2])}</div><div class="sub">${bk(pct(ii[1],ii[2]),'bad')} vs abr</div></div>
-        <div class="card"><div class="lbl">Falhas n8n</div><div class="val" style="font-size:17px">${fmt(in8[2])}</div><div class="sub">${bk(pct(in8[1],in8[2]),'bad')} vs abr</div></div>
-        <div class="card"><div class="lbl">Demandas Dados</div><div class="val">${fmt(de[2])}/${fmt(dp[2])}</div><div class="sub">${taxa!==null?`<span class="bk am">${taxa}%</span> taxa`:''}</div></div>
-        <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:17px">${fmt(dd[2])}</div><div class="sub">${bk(pct(dd[0],dd[2]),'bad')} vs mar</div></div>
+        <div class="card"><div class="lbl">Tarefas entregues</div><div class="val">${fmt(ev[last])}</div><div class="sub">${bk(pct(ev[prev],ev[last]),'good')} vs anterior</div></div>
+        <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${fmt(eb[last])}</div><div class="sub">${bk(pct(eb[prev],eb[last]),'good')} vs anterior</div></div>
+        <div class="card"><div class="lbl">Incidentes Infra</div><div class="val">${fmt(ii[last])}</div><div class="sub">${bk(pct(ii[prev],ii[last]),'bad')} vs anterior</div></div>
+        <div class="card"><div class="lbl">Falhas n8n</div><div class="val" style="font-size:17px">${fmt(in8[last])}</div><div class="sub">${bk(pct(in8[prev],in8[last]),'bad')} vs anterior</div></div>
+        <div class="card"><div class="lbl">Demandas Dados</div><div class="val">${fmt(de[last])}/${fmt(dp[last])}</div><div class="sub">${taxa!==null?`<span class="bk am">${taxa}%</span> taxa`:''}</div></div>
+        <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:17px">${fmt(dd[last])}</div><div class="sub">${bk(pct(dd[0],dd[last]),'bad')} vs ${months[0]?.label||''}</div></div>
       </div>
-      <div class="sl">Tarefas, bugs e incidentes por mês</div>
-      <div class="leg">
-        <span><span class="leg-sq" style="background:#B5D4F4"></span>Março</span>
-        <span><span class="leg-sq" style="background:#9FE1CB"></span>Abril</span>
-        <span><span class="leg-sq" style="background:#FAC775"></span>Maio</span>
-      </div>
+      <div class="sl">Tarefas, bugs e incidentes</div>
+      <div class="leg">${M.map((m,i)=>`<span><span class="leg-sq" style="background:${COLORS[i%COLORS.length]}"></span>${m}</span>`).join('')}</div>
       <div class="cw" style="height:250px"><canvas id="c-all-bar"></canvas></div>
       <div class="sl">Falhas n8n — evolução</div>
       <div class="cw" style="height:190px"><canvas id="c-all-n8n"></canvas></div>
     </div>
-
-    <!-- ENG -->
     <div class="sec" id="sec-eng">
-      <div class="sl" style="color:#3B6D11">Totais mensais</div>
+      <div class="sl" style="color:#3B6D11">Comparativo mensal</div>
       <div class="cards">
-        <div class="card"><div class="lbl">Tarefas (mai)</div><div class="val">${fmt(ev[2])}</div><div class="sub">${bk(pct(ev[1],ev[2]),'good')} vs abr</div></div>
-        <div class="card"><div class="lbl">Bugs corrigidos (mai)</div><div class="val">${fmt(eb[2])}</div><div class="sub">${bk(pct(eb[1],eb[2]),'good')} vs abr</div></div>
-        <div class="card"><div class="lbl">Backlog bugs (mai)</div><div class="val">${fmt(ebk[2])}</div><div class="sub" style="color:#999;font-size:11px">mar: ${fmt(ebk[0])}</div></div>
-        <div class="card"><div class="lbl">WIP (mai)</div><div class="val">${fmt(ew[2])}</div><div class="sub">${bk(pct(ew[1],ew[2]),'bad')} vs abr</div></div>
+        <div class="card"><div class="lbl">Tarefas (${lbl})</div><div class="val">${fmt(ev[last])}</div><div class="sub">${bk(pct(ev[prev],ev[last]),'good')} vs anterior</div></div>
+        <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${fmt(eb[last])}</div><div class="sub">${bk(pct(eb[prev],eb[last]),'good')} vs anterior</div></div>
+        <div class="card"><div class="lbl">Backlog bugs</div><div class="val">${fmt(ebk[last])}</div><div class="sub" style="color:#999;font-size:11px">${months[0]?.label}: ${fmt(ebk[0])}</div></div>
+        <div class="card"><div class="lbl">WIP</div><div class="val">${fmt(ew[last])}</div><div class="sub">${bk(pct(ew[prev],ew[last]),'bad')} vs anterior</div></div>
       </div>
       <div class="tw"><table>
-        <thead><tr><th style="text-align:left">Indicador</th><th>Março</th><th>Abril</th><th>Maio</th><th>Mar→Abr</th><th>Abr→Mai</th></tr></thead>
+        <thead><tr><th style="text-align:left">Indicador</th>${M.map(m=>`<th>${m}</th>`).join('')}${months.length>=2?`<th>${months[months.length-2].label}→${months[months.length-1].label}</th>`:''}</tr></thead>
         <tbody>
-          <tr><td>Tarefas/Story entregues</td><td>${fmt(ev[0])}</td><td>${fmt(ev[1])}</td><td>${fmt(ev[2])}</td><td>${bk(pct(ev[0],ev[1]),'good')}</td><td>${bk(pct(ev[1],ev[2]),'good')}</td></tr>
-          <tr><td>Bugs corrigidos</td><td>${fmt(eb[0])}</td><td>${fmt(eb[1])}</td><td>${fmt(eb[2])}</td><td>${bk(pct(eb[0],eb[1]),'good')}</td><td>${bk(pct(eb[1],eb[2]),'good')}</td></tr>
-          <tr><td>Bugs em backlog</td><td>${fmt(ebk[0])}</td><td>${fmt(ebk[1])}</td><td>${fmt(ebk[2])}</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
-          <tr><td>Demandas em andamento (WIP)</td><td>${fmt(ew[0])}</td><td>${fmt(ew[1])}</td><td>${fmt(ew[2])}</td><td>${bk(pct(ew[0],ew[1]),'bad')}</td><td>${bk(pct(ew[1],ew[2]),'bad')}</td></tr>
+          <tr><td>Tarefas/Story entregues</td>${ev.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${bk(pct(ev[prev],ev[last]),'good')}</td></tr>
+          <tr><td>Bugs corrigidos</td>${eb.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${bk(pct(eb[prev],eb[last]),'good')}</td></tr>
+          <tr><td>Bugs em backlog</td>${ebk.map(v=>`<td>${fmt(v)}</td>`).join('')}<td><span class="bk na">sem dado</span></td></tr>
+          <tr><td>Demandas em andamento (WIP)</td>${ew.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${bk(pct(ew[prev],ew[last]),'bad')}</td></tr>
         </tbody>
       </table></div>
       <div class="sl">Evolução — tarefas, bugs e WIP</div>
@@ -254,28 +390,19 @@ function render(mar, abr, mai) {
       </div>
       <div class="cw" style="height:230px"><canvas id="c-eng-line"></canvas></div>
     </div>
-
-    <!-- INF -->
     <div class="sec" id="sec-inf">
-      <div class="sl" style="color:#185FA5">Totais mensais</div>
+      <div class="sl" style="color:#185FA5">Comparativo mensal</div>
       <div class="cards">
-        <div class="card"><div class="lbl">Incidentes (mai)</div><div class="val">${fmt(ii[2])}</div><div class="sub">${bk(pct(ii[1],ii[2]),'bad')} vs abr</div></div>
-        <div class="card"><div class="lbl">Falhas n8n total (mai)</div><div class="val" style="font-size:17px">${fmt(in8[2])}</div><div class="sub">${bk(pct(in8[1],in8[2]),'bad')} vs abr</div></div>
-        <div class="card"><div class="lbl">Falhas n8n Infra (mai)</div><div class="val" style="font-size:17px">${fmt(in8i[2])}</div><div class="sub">${bk(pct(in8i[1],in8i[2]),'bad')} vs abr</div></div>
-        <div class="card"><div class="lbl">Demandas N3 (mai)</div><div class="val">${fmt(mai.inf_n3)}</div><div class="sub" style="color:#999;font-size:11px">novo indicador</div></div>
+        <div class="card"><div class="lbl">Incidentes (${lbl})</div><div class="val">${fmt(ii[last])}</div><div class="sub">${bk(pct(ii[prev],ii[last]),'bad')} vs anterior</div></div>
+        <div class="card"><div class="lbl">Falhas n8n total</div><div class="val" style="font-size:17px">${fmt(in8[last])}</div><div class="sub">${bk(pct(in8[prev],in8[last]),'bad')} vs anterior</div></div>
+        <div class="card"><div class="lbl">Falhas n8n Infra</div><div class="val" style="font-size:17px">${fmt(in8i[last])}</div><div class="sub">${bk(pct(in8i[prev],in8i[last]),'bad')} vs anterior</div></div>
       </div>
       <div class="tw"><table>
-        <thead><tr><th style="text-align:left">Indicador</th><th>Março</th><th>Abril</th><th>Maio</th><th>Mar→Abr</th><th>Abr→Mai</th></tr></thead>
+        <thead><tr><th style="text-align:left">Indicador</th>${M.map(m=>`<th>${m}</th>`).join('')}</tr></thead>
         <tbody>
-          <tr><td>Incidentes no mês</td><td>${fmt(ii[0])}</td><td>${fmt(ii[1])}</td><td>${fmt(ii[2])}</td><td>${bk(pct(ii[0],ii[1]),'bad')}</td><td>${bk(pct(ii[1],ii[2]),'bad')}</td></tr>
-          <tr><td>Falhas n8n (total)</td><td>${fmt(in8[0])}</td><td>${fmt(in8[1])}</td><td>${fmt(in8[2])}</td><td>${bk(pct(in8[0],in8[1]),'bad')}</td><td>${bk(pct(in8[1],in8[2]),'bad')}</td></tr>
-          <tr><td>Falhas n8n (só Infra)</td><td>—</td><td>${fmt(in8i[1])}</td><td>${fmt(in8i[2])}</td><td><span class="bk na">sem dado</span></td><td>${bk(pct(in8i[1],in8i[2]),'bad')}</td></tr>
-          <tr><td>Demandas N3</td><td>—</td><td>—</td><td>${fmt(mai.inf_n3)}</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
-          <tr><td>Mensagens trocadas</td><td>${fmt(mar.inf_msg)}</td><td>—</td><td>—</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
-          <tr><td>Logins na plataforma</td><td>${fmt(mar.inf_logins)}</td><td>—</td><td>—</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
-          <tr><td>Consumo Oracle (R$)</td><td>${mar.inf_oracle!=null?'R$ '+fmt(mar.inf_oracle):'—'}</td><td>—</td><td>—</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
-          <tr><td>Consumo IA Oracle (R$)</td><td>${mar.inf_oracle_ia!=null?'R$ '+fmt(mar.inf_oracle_ia):'—'}</td><td>—</td><td>—</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
-          <tr><td>Consumo IA OpenAI ($)</td><td>${mar.inf_openai!=null?'$'+fmt(mar.inf_openai):'—'}</td><td>—</td><td>—</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
+          <tr><td>Incidentes</td>${ii.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
+          <tr><td>Falhas n8n (total)</td>${in8.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
+          <tr><td>Falhas n8n (só Infra)</td>${in8i.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
         </tbody>
       </table></div>
       <div class="sl">Falhas n8n — evolução</div>
@@ -283,54 +410,157 @@ function render(mar, abr, mai) {
       <div class="sl">Incidentes por mês</div>
       <div class="cw" style="height:170px"><canvas id="c-inf-inc"></canvas></div>
     </div>
-
-    <!-- DAT -->
     <div class="sec" id="sec-dat">
-      <div class="sl" style="color:#854F0B">Totais mensais</div>
+      <div class="sl" style="color:#854F0B">Comparativo mensal</div>
       <div class="cards">
-        <div class="card"><div class="lbl">Entregues/Planejadas (mai)</div><div class="val">${fmt(de[2])}/${fmt(dp[2])}</div><div class="sub">${taxa!==null?`<span class="bk am">${taxa}%</span> taxa`:''}</div></div>
-        <div class="card"><div class="lbl">Atrasadas (mai)</div><div class="val">${fmt(da[2])}</div><div class="sub">${bk(pct(da[1],da[2]),'bad')} vs abr</div></div>
-        <div class="card"><div class="lbl">Falhas pipeline (mai)</div><div class="val">${fmt(dpi[2])}</div><div class="sub" style="color:#999;font-size:11px">mar: ${fmt(dpi[0])}</div></div>
-        <div class="card"><div class="lbl">Falhas dashboards (mai)</div><div class="val" style="font-size:17px">${fmt(dd[2])}</div><div class="sub">${bk(pct(dd[0],dd[2]),'bad')} vs mar</div></div>
+        <div class="card"><div class="lbl">Entregues/Planejadas</div><div class="val">${fmt(de[last])}/${fmt(dp[last])}</div><div class="sub">${taxa!==null?`<span class="bk am">${taxa}%</span> taxa`:''}</div></div>
+        <div class="card"><div class="lbl">Atrasadas</div><div class="val">${fmt(da[last])}</div><div class="sub">${bk(pct(da[prev],da[last]),'bad')} vs anterior</div></div>
+        <div class="card"><div class="lbl">Falhas pipeline</div><div class="val">${fmt(dpi[last])}</div><div class="sub" style="color:#999;font-size:11px">${months[0]?.label}: ${fmt(dpi[0])}</div></div>
+        <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:17px">${fmt(dd[last])}</div><div class="sub">${bk(pct(dd[0],dd[last]),'bad')} vs ${months[0]?.label}</div></div>
       </div>
       <div class="tw"><table>
-        <thead><tr><th style="text-align:left">Indicador</th><th>Março</th><th>Abril</th><th>Maio</th><th>Mar→Abr</th><th>Abr→Mai</th></tr></thead>
+        <thead><tr><th style="text-align:left">Indicador</th>${M.map(m=>`<th>${m}</th>`).join('')}</tr></thead>
         <tbody>
-          <tr><td>Demandas planejadas</td><td>${fmt(dp[0])}</td><td>${fmt(dp[1])}</td><td>${fmt(dp[2])}</td><td>${bk(pct(dp[0],dp[1]),'good')}</td><td>${bk(pct(dp[1],dp[2]),'good')}</td></tr>
-          <tr><td>Demandas entregues</td><td>${fmt(de[0])}</td><td>${fmt(de[1])}</td><td>${fmt(de[2])}</td><td>${bk(pct(de[0],de[1]),'good')}</td><td>${bk(pct(de[1],de[2]),'good')}</td></tr>
-          <tr><td>Demandas atrasadas</td><td>${fmt(da[0])}</td><td>${fmt(da[1])}</td><td>${fmt(da[2])}</td><td><span class="bk gn">=</span></td><td>${bk(pct(da[1],da[2]),'bad')}</td></tr>
-          <tr><td>Falhas na pipeline</td><td>${fmt(dpi[0])}</td><td>—</td><td>${fmt(dpi[2])}</td><td><span class="bk na">sem dado</span></td><td><span class="bk na">sem dado</span></td></tr>
-          <tr><td>Falhas em dashboards</td><td>${fmt(dd[0])}</td><td>—</td><td>${fmt(dd[2])}</td><td><span class="bk na">sem dado</span></td><td>${bk(pct(dd[0],dd[2]),'bad')}</td></tr>
+          <tr><td>Demandas planejadas</td>${dp.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
+          <tr><td>Demandas entregues</td>${de.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
+          <tr><td>Demandas atrasadas</td>${da.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
+          <tr><td>Falhas na pipeline</td>${dpi.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
+          <tr><td>Falhas em dashboards</td>${dd.map(v=>`<td>${fmt(v)}</td>`).join('')}</tr>
         </tbody>
       </table></div>
       <div class="sl">Planejadas vs entregues</div>
       <div class="leg"><span><span class="leg-sq" style="background:#FAC775"></span>Planejadas</span><span><span class="leg-sq" style="background:#9FE1CB"></span>Entregues</span></div>
       <div class="cw" style="height:195px"><canvas id="c-dat-bar"></canvas></div>
-      <div class="sl">Falhas em dashboards</div>
-      <div class="cw" style="height:180px"><canvas id="c-dat-dash"></canvas></div>
     </div>
   </div>`;
 
-  const ln = (color, bg) => ({borderColor:color, backgroundColor:bg, borderWidth:2, pointRadius:5, pointBackgroundColor:color, fill:true, tension:0.3});
-  mkBar('c-all-bar', ['Tarefas','Bugs','Incidentes'], [
-    {label:'Março', data:[ev[0],eb[0],ii[0]], backgroundColor:'#B5D4F4', borderColor:'#378ADD', borderWidth:1, borderRadius:4},
-    {label:'Abril', data:[ev[1],eb[1],ii[1]], backgroundColor:'#9FE1CB', borderColor:'#1D9E75', borderWidth:1, borderRadius:4},
-    {label:'Maio',  data:[ev[2],eb[2],ii[2]], backgroundColor:'#FAC775', borderColor:'#EF9F27', borderWidth:1, borderRadius:4},
-  ]);
-  mkLine('c-all-n8n',  M, [{label:'n8n', data:in8, ...ln('#E24B4A','rgba(226,75,74,.07)')}]);
+  const ln = (color,bg) => ({borderColor:color,backgroundColor:bg,borderWidth:2,pointRadius:5,pointBackgroundColor:color,fill:true,tension:0.3});
+  mkBar('c-all-bar',['Tarefas','Bugs','Incidentes'],
+    months.map((m,i)=>({label:m.label,data:[m.d.eng_tarefas,m.d.eng_bugs,m.d.inf_inc],backgroundColor:COLORS[i%COLORS.length],borderColor:BORDERS[i%BORDERS.length],borderWidth:1,borderRadius:4}))
+  );
+  mkLine('c-all-n8n', M, [{label:'n8n',data:in8,...ln('#E24B4A','rgba(226,75,74,.07)')}]);
   mkLine('c-eng-line', M, [
-    {label:'Tarefas', data:ev, ...ln('#639922','rgba(99,153,34,.07)')},
-    {label:'Bugs', data:eb, borderColor:'#E24B4A', borderWidth:2, pointRadius:5, pointBackgroundColor:'#E24B4A', pointStyle:'triangle', fill:false, tension:0.3},
-    {label:'WIP', data:ew, borderColor:'#888', borderDash:[5,4], borderWidth:1.5, pointRadius:4, pointBackgroundColor:'#888', fill:false, tension:0.3},
+    {label:'Tarefas',data:ev,...ln('#639922','rgba(99,153,34,.07)')},
+    {label:'Bugs',data:eb,borderColor:'#E24B4A',borderWidth:2,pointRadius:5,pointBackgroundColor:'#E24B4A',pointStyle:'triangle',fill:false,tension:0.3},
+    {label:'WIP',data:ew,borderColor:'#888',borderDash:[5,4],borderWidth:1.5,pointRadius:4,pointBackgroundColor:'#888',fill:false,tension:0.3},
   ]);
-  mkLine('c-inf-n8n', M, [{label:'n8n', data:in8, ...ln('#E24B4A','rgba(226,75,74,.07)')}]);
-  mkBar('c-inf-inc',  M, [{label:'Inc', data:ii, backgroundColor:['#B5D4F4','#9FE1CB','#FAC775'], borderColor:['#378ADD','#1D9E75','#EF9F27'], borderWidth:1, borderRadius:4}]);
-  mkBar('c-dat-bar',  M, [
-    {label:'Plan', data:dp, backgroundColor:'#FAC775', borderColor:'#EF9F27', borderWidth:1, borderRadius:4},
-    {label:'Entr', data:de, backgroundColor:'#9FE1CB', borderColor:'#1D9E75', borderWidth:1, borderRadius:4},
+  mkLine('c-inf-n8n', M, [{label:'n8n',data:in8,...ln('#E24B4A','rgba(226,75,74,.07)')}]);
+  mkBar('c-inf-inc', M, [{label:'Inc',data:ii,backgroundColor:COLORS.slice(0,M.length),borderColor:BORDERS.slice(0,M.length),borderWidth:1,borderRadius:4}]);
+  mkBar('c-dat-bar', M, [
+    {label:'Plan',data:dp,backgroundColor:'#FAC775',borderColor:'#EF9F27',borderWidth:1,borderRadius:4},
+    {label:'Entr',data:de,backgroundColor:'#9FE1CB',borderColor:'#1D9E75',borderWidth:1,borderRadius:4},
   ]);
-  mkLine('c-dat-dash', ['Março','(Abr s/ dado)','Maio'], [{label:'Dash', data:[dd[0],null,dd[2]], ...ln('#EF9F27','rgba(239,159,39,.08)'), spanGaps:true}]);
 }
+
+function renderSingle(d, label, isWeek) {
+  const taxa = d.dat_plan>0 ? Math.round(d.dat_entr/d.dat_plan*100) : null;
+  document.getElementById('root').innerHTML = `
+  <div class="wrap">
+    <div class="ctx-bar">📅 <span>${label}</span>${isWeek?' · visão semanal':' · visão mensal'}</div>
+    <div class="tabs">
+      <button class="tab active all" onclick="setTab('all')">Visão geral</button>
+      <button class="tab eng" onclick="setTab('eng')">Engenharia</button>
+      <button class="tab inf" onclick="setTab('inf')">Infra</button>
+      <button class="tab dat" onclick="setTab('dat')">Dados</button>
+    </div>
+    <div class="sec visible" id="sec-all">
+      <div class="sl">Resumo — ${label}</div>
+      <div class="cards">
+        <div class="card"><div class="lbl">Tarefas entregues</div><div class="val">${fmt(d.eng_tarefas)}</div></div>
+        <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${fmt(d.eng_bugs)}</div></div>
+        <div class="card"><div class="lbl">Incidentes Infra</div><div class="val">${fmt(d.inf_inc)}</div></div>
+        <div class="card"><div class="lbl">Falhas n8n</div><div class="val" style="font-size:17px">${fmt(d.inf_n8n)}</div></div>
+        <div class="card"><div class="lbl">Demandas Dados</div><div class="val">${fmt(d.dat_entr)}/${fmt(d.dat_plan)}</div><div class="sub">${taxa!==null?`<span class="bk am">${taxa}%</span> taxa`:''}</div></div>
+        <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:17px">${fmt(d.dat_dash)}</div></div>
+      </div>
+    </div>
+    <div class="sec" id="sec-eng">
+      <div class="sl" style="color:#3B6D11">Engenharia</div>
+      <div class="cards">
+        <div class="card"><div class="lbl">Tarefas entregues</div><div class="val">${fmt(d.eng_tarefas)}</div></div>
+        <div class="card"><div class="lbl">Bugs corrigidos</div><div class="val">${fmt(d.eng_bugs)}</div></div>
+        <div class="card"><div class="lbl">Bugs em backlog</div><div class="val">${fmt(d.eng_backlog)}</div></div>
+        <div class="card"><div class="lbl">WIP</div><div class="val">${fmt(d.eng_wip)}</div></div>
+      </div>
+    </div>
+    <div class="sec" id="sec-inf">
+      <div class="sl" style="color:#185FA5">Infra</div>
+      <div class="cards">
+        <div class="card"><div class="lbl">Incidentes</div><div class="val">${fmt(d.inf_inc)}</div></div>
+        <div class="card"><div class="lbl">Falhas n8n total</div><div class="val" style="font-size:17px">${fmt(d.inf_n8n)}</div></div>
+        <div class="card"><div class="lbl">Falhas n8n Infra</div><div class="val" style="font-size:17px">${fmt(d.inf_n8n_infra)}</div></div>
+        <div class="card"><div class="lbl">Demandas N3</div><div class="val">${fmt(d.inf_n3)}</div></div>
+      </div>
+    </div>
+    <div class="sec" id="sec-dat">
+      <div class="sl" style="color:#854F0B">Dados</div>
+      <div class="cards">
+        <div class="card"><div class="lbl">Planejadas</div><div class="val">${fmt(d.dat_plan)}</div></div>
+        <div class="card"><div class="lbl">Entregues</div><div class="val">${fmt(d.dat_entr)}</div></div>
+        <div class="card"><div class="lbl">Atrasadas</div><div class="val">${fmt(d.dat_atrs)}</div></div>
+        <div class="card"><div class="lbl">Falhas pipeline</div><div class="val">${fmt(d.dat_pipe)}</div></div>
+        <div class="card"><div class="lbl">Falhas dashboards</div><div class="val" style="font-size:17px">${fmt(d.dat_dash)}</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Filtro ────────────────────────────────────────────────────────────────────
+function buildFilterUI() {
+  const { availableSheets, allData, selMonth, selWeek } = state;
+  const pmEl = document.getElementById('pillMonths');
+  const pwEl = document.getElementById('pillWeeks');
+  const wkSec = document.getElementById('weekSection');
+
+  pmEl.innerHTML = availableSheets.map(k => {
+    const s = KNOWN_SHEETS.find(x => x.key === k);
+    const lbl = s?.label || k;
+    return `<button class="pill${selMonth===k?' active':''}" onclick="selectMonth('${k}')">${lbl}</button>`;
+  }).join('');
+
+  if (selMonth) {
+    const weeks = allData[selMonth]?.weekly || [];
+    if (weeks.length > 0) {
+      wkSec.style.display = '';
+      pwEl.innerHTML = weeks.map(w =>
+        `<button class="pill${selWeek===w.label?' active':''}" onclick="selectWeek('${w.label}')">${w.label}</button>`
+      ).join('');
+    } else {
+      wkSec.style.display = 'none';
+    }
+  } else {
+    wkSec.style.display = 'none';
+  }
+
+  // badge
+  const active = selMonth ? 1 : 0;
+  const badge = document.getElementById('filterBadge');
+  badge.style.display = active ? 'inline-flex' : 'none';
+  badge.textContent = active;
+}
+
+function selectMonth(key) {
+  if (state.selMonth === key) {
+    state.selMonth = null; state.selWeek = null;
+  } else {
+    state.selMonth = key; state.selWeek = null;
+  }
+  buildFilterUI();
+  render();
+}
+
+function selectWeek(label) {
+  state.selWeek = state.selWeek === label ? null : label;
+  buildFilterUI();
+  render();
+}
+
+function toggleFilter() {
+  document.getElementById('modalBg').classList.toggle('open');
+  buildFilterUI();
+}
+function closeFilter() { document.getElementById('modalBg').classList.remove('open'); }
+function handleBgClick(e) { if (e.target === document.getElementById('modalBg')) closeFilter(); }
 
 function setTab(t) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
@@ -339,28 +569,43 @@ function setTab(t) {
   document.getElementById('sec-' + t).classList.add('visible');
 }
 
+// ── Load ──────────────────────────────────────────────────────────────────────
 async function loadData() {
   const btn = document.getElementById('btnRefresh');
   btn.disabled = true;
   btn.innerHTML = '<span class="spin">↻</span> Buscando…';
 
   try {
-    const [rowsMar, rowsAbr, rowsMai] = await Promise.all([
-      fetchSheet('Mar/2026'),
-      fetchSheet('Abril/2026'),
-      fetchSheet('Maio/2026'),
-    ]);
-    const mar = parseMonth(rowsMar);
-    const abr = parseMonth(rowsAbr);
-    const mai = parseMonth(rowsMai);
-    render(mar, abr, mai);
+    // tenta buscar todas as abas conhecidas; ignora as que não existem (404)
+    const results = await Promise.allSettled(
+      KNOWN_SHEETS.map(s => fetchSheet(s.sheet).then(rows => ({ key: s.key, rows })))
+    );
+
+    state.allData = {};
+    state.availableSheets = [];
+
+    for (const r of results) {
+      if (r.status === 'fulfilled') {
+        const { key, rows } = r.value;
+        state.allData[key] = {
+          monthly: parseMonthly(rows),
+          weekly:  parseWeekly(rows),
+        };
+        state.availableSheets.push(key);
+      }
+    }
+
+    // se mês selecionado sumiu, reseta
+    if (state.selMonth && !state.availableSheets.includes(state.selMonth)) {
+      state.selMonth = null; state.selWeek = null;
+    }
+
+    render();
     document.getElementById('upd').textContent = 'Atualizado ' +
       new Date().toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
   } catch(e) {
     document.getElementById('root').innerHTML =
-      `<div class="wrap"><div class="err">⚠️ Erro ao buscar dados: <b>${e.message}</b><br><br>
-      Verifique se a planilha está pública (Compartilhar → "Qualquer pessoa com o link").<br>
-      Nomes das abas esperados: <code>Mar/2026</code>, <code>Abril/2026</code>, <code>Maio/2026</code></div></div>`;
+      `<div class="wrap"><div class="err">⚠️ Erro: <b>${e.message}</b></div></div>`;
   }
 
   btn.disabled = false;
